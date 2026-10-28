@@ -1,765 +1,629 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>104~106年度 16400車輛塗裝丙級技術士技能檢定學科測試</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans TC", sans-serif;
-        }
-        .option-btn {
-            transition: all 0.15s ease-in-out;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>車輛塗裝丙級技術士 學科題庫測驗系統</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
+    body { font-family: 'Noto Sans TC', sans-serif; }
+  </style>
 </head>
-<body class="bg-slate-100 text-slate-800 min-h-screen pb-16">
+<body class="bg-slate-100 text-slate-800 min-h-screen pb-20">
 
-    <!-- 自訂提示彈窗 Modal (取代原生 alert / confirm) -->
-    <div id="customModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/50 backdrop-blur-xs px-4">
-        <div class="bg-white rounded-2xl shadow-xl border border-slate-200 max-w-md w-full p-6 transform transition-all">
-            <h3 id="modalTitle" class="text-lg font-bold text-slate-900 mb-2">提示</h3>
-            <p id="modalMessage" class="text-sm text-slate-600 mb-6 leading-relaxed"></p>
-            <div class="flex justify-end gap-2.5">
-                <button id="modalCancelBtn" class="px-4 py-2 rounded-lg text-sm font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 transition">
-                    取消
-                </button>
-                <button id="modalConfirmBtn" class="px-4 py-2 rounded-lg text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition">
-                    確定
-                </button>
-            </div>
-        </div>
+  <!-- 頂部置頂導航欄 -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur shadow-sm border-b border-slate-200">
+    <div class="max-w-4xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <h1 class="text-lg md:text-xl font-black text-slate-800 flex items-center gap-2">
+          <span>🚗 車輛塗裝丙級檢定</span>
+          <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">104~106歷屆</span>
+        </h1>
+        <p class="text-xs text-slate-500 mt-0.5">共 240 題 · 單選題每題 1.25 分</p>
+      </div>
+
+      <!-- 右側動作區 -->
+      <div class="flex items-center gap-2">
+        <button id="submitBtn" onclick="submitExam()" class="hidden px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-bold shadow-sm transition">
+          交卷對答案
+        </button>
+        <button onclick="resetCurrentYear()" class="px-3 py-1.5 border border-slate-300 hover:bg-slate-50 text-slate-600 rounded-lg text-sm font-medium transition">
+          重置
+        </button>
+      </div>
     </div>
 
-    <!-- 頂部固定導覽列 -->
-    <header class="sticky top-0 z-30 bg-white shadow-md border-b border-slate-200">
-        <!-- 年度切換頁籤列 -->
-        <div class="bg-slate-900 text-white">
-            <div class="max-w-4xl mx-auto px-4 pt-2.5 flex items-center justify-between flex-wrap gap-2">
-                <div class="flex items-center space-x-1 sm:space-x-2">
-                    <button id="tab-104" onclick="switchYear('104')" class="px-4 py-2 rounded-t-lg text-sm font-bold transition flex items-center gap-2 bg-white text-slate-900">
-                        <span>104年度</span>
-                        <span id="tab-badge-104" class="text-xs px-1.5 py-0.5 rounded-full bg-slate-200 text-slate-700 font-normal">0/80</span>
-                    </button>
-                    <button id="tab-105" onclick="switchYear('105')" class="px-4 py-2 rounded-t-lg text-sm font-bold transition flex items-center gap-2 bg-slate-800 text-slate-300 hover:bg-slate-700">
-                        <span>105年度</span>
-                        <span id="tab-badge-105" class="text-xs px-1.5 py-0.5 rounded-full bg-slate-700 text-slate-300 font-normal">0/80</span>
-                    </button>
-                    <button id="tab-106" onclick="switchYear('106')" class="px-4 py-2 rounded-t-lg text-sm font-bold transition flex items-center gap-2 bg-slate-800 text-slate-300 hover:bg-slate-700">
-                        <span>106年度</span>
-                        <span id="tab-badge-106" class="text-xs px-1.5 py-0.5 rounded-full bg-slate-700 text-slate-300 font-normal">0/80</span>
-                    </button>
-                </div>
-                <div class="text-xs text-slate-400 pb-2 hidden sm:block">
-                    16400 車輛塗裝丙級技術士學科題庫（共 240 題）
-                </div>
-            </div>
+    <!-- 年度切換與模式選擇列 -->
+    <div class="max-w-4xl mx-auto px-4 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <!-- 年度頁籤 -->
+      <div class="flex bg-slate-100 p-1 rounded-xl text-sm font-bold">
+        <button onclick="switchYear('104')" id="tab-104" class="px-4 py-1.5 rounded-lg transition text-slate-600">104 年度</button>
+        <button onclick="switchYear('105')" id="tab-105" class="px-4 py-1.5 rounded-lg transition text-slate-600">105 年度</button>
+        <button onclick="switchYear('106')" id="tab-106" class="px-4 py-1.5 rounded-lg transition text-slate-600">106 年度</button>
+      </div>
+
+      <!-- 模式切換 -->
+      <div class="flex bg-slate-200/80 p-1 rounded-xl text-xs sm:text-sm font-semibold">
+        <button onclick="setMode('study')" id="mode-study" class="px-3 py-1.5 rounded-lg transition flex items-center gap-1">
+          <span>📖</span> 讀書背題
+        </button>
+        <button onclick="setMode('instant')" id="mode-instant" class="px-3 py-1.5 rounded-lg transition flex items-center gap-1">
+          <span>⚡</span> 即時練習
+        </button>
+        <button onclick="setMode('exam')" id="mode-exam" class="px-3 py-1.5 rounded-lg transition flex items-center gap-1">
+          <span>📝</span> 模擬測驗
+        </button>
+      </div>
+    </div>
+
+    <!-- 即時狀態 / 成績橫幅 -->
+    <div id="statusBar" class="bg-slate-800 text-white text-xs px-4 py-2 border-t border-slate-700">
+      <div class="max-w-4xl mx-auto flex flex-wrap items-center justify-between gap-2">
+        <div id="statusText" class="font-medium flex items-center gap-2">
+          <span>讀書背題模式：正確答案已直接標示，適合考前速讀記憶</span>
         </div>
-
-        <div class="max-w-4xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
-            <div>
-                <h1 id="yearTitle" class="text-lg md:text-xl font-bold text-slate-900">104年度 車輛塗裝丙級 學科練習</h1>
-                <p class="text-xs text-slate-500">本卷 80 題單選題，每題 1.25 分，滿分 100 分（60 分及格）</p>
-            </div>
-            
-            <div class="flex items-center gap-3 flex-wrap">
-                <!-- 模式切換 -->
-                <div class="flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200 text-xs sm:text-sm">
-                    <button id="modeExamBtn" onclick="setMode('exam')" class="px-3 py-1.5 rounded-md font-medium bg-blue-600 text-white shadow-sm transition">
-                        模擬測驗 (交卷才對答案)
-                    </button>
-                    <button id="modeInstantBtn" onclick="setMode('instant')" class="px-3 py-1.5 rounded-md font-medium text-slate-600 hover:text-slate-900 transition">
-                        即時練習 (選完馬上對)
-                    </button>
-                </div>
-
-                <!-- 進度與操作 -->
-                <div class="flex items-center gap-2">
-                    <span id="progressBadge" class="text-xs sm:text-sm font-semibold bg-slate-100 text-slate-700 px-3 py-1.5 rounded-full border border-slate-300">
-                        已作答: 0 / 80
-                    </span>
-                    <button id="submitBtn" onclick="submitQuiz()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-4 py-1.5 rounded-lg text-sm shadow transition">
-                        交卷對答案
-                    </button>
-                    <button onclick="resetQuiz()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium px-3 py-1.5 rounded-lg text-sm transition">
-                        重考本卷
-                    </button>
-                </div>
-            </div>
+        <div id="filterControl" class="hidden flex items-center gap-2">
+          <button onclick="toggleWrongOnly()" id="wrongOnlyBtn" class="px-2 py-0.5 rounded bg-slate-700 hover:bg-slate-600 border border-slate-600 text-xs text-amber-300">
+            只看錯題 / 未答
+          </button>
         </div>
+      </div>
+    </div>
+  </header>
 
-        <!-- 成績與篩選列 (交卷後顯示) -->
-        <div id="resultBanner" class="hidden bg-slate-900 text-white border-t border-slate-700">
-            <div class="max-w-4xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-4">
-                <div class="flex items-center gap-4">
-                    <div>
-                        <span class="text-xs text-slate-400 block">本卷總分</span>
-                        <span id="scoreText" class="text-2xl font-extrabold text-amber-400">0</span>
-                        <span class="text-xs text-slate-400">/ 100 分</span>
-                        <span id="passStatusBadge" class="ml-2 text-xs px-2 py-0.5 rounded font-bold"></span>
-                    </div>
-                    <div class="h-8 w-px bg-slate-700"></div>
-                    <div class="text-xs sm:text-sm space-y-0.5">
-                        <div>答對：<span id="correctCount" class="font-bold text-emerald-400">0</span> 題</div>
-                        <div>答錯 / 未答：<span id="wrongCount" class="font-bold text-rose-400">0</span> 題</div>
-                    </div>
-                </div>
+  <!-- 主內容區 -->
+  <main class="max-w-4xl mx-auto px-4 mt-6">
+    <!-- 搜尋與快速跳題列 -->
+    <div class="mb-5 flex flex-col sm:flex-row gap-3">
+      <div class="relative flex-1">
+        <input type="text" id="searchInput" oninput="handleSearch()" placeholder="🔍 搜尋題目或關鍵字（例：HVLP、補土、稀釋劑、波長...）" class="w-full px-4 py-2 rounded-xl border border-slate-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm">
+      </div>
+      <div class="flex items-center gap-2 text-xs text-slate-500 font-medium">
+        <span>快速跳題：</span>
+        <select id="jumpSelect" onchange="jumpToQuestion(this.value)" class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm">
+          <!-- 動態生成 1~80 題 -->
+        </select>
+      </div>
+    </div>
 
-                <div class="flex items-center gap-2 text-xs sm:text-sm">
-                    <span class="text-slate-400">檢視：</span>
-                    <button onclick="setFilter('all')" id="filterAllBtn" class="px-3 py-1 rounded bg-slate-700 text-white font-medium">全部題目 (80)</button>
-                    <button onclick="setFilter('wrong')" id="filterWrongBtn" class="px-3 py-1 rounded bg-slate-800 text-slate-300 hover:bg-slate-700">只看錯題/未答</button>
-                </div>
+    <!-- 題目列表容器 -->
+    <div id="questionList" class="space-y-4"></div>
+  </main>
+
+  <script>
+    // 完整題庫數據（104、105、106 各 80 題，共 240 題）
+    // 格式：[題號, 題目, [選項1, 選項2, 選項3, 選項4], 正確答案 (1~4)]
+    const RAW_QUESTIONS = {
+      "104": [
+        [1,"1加侖約等於公升。",["3.785","5.250","4.000","6.000"],1],
+        [2,"鍍鋅鋼板可使用防銹底漆(WASHPRIMER)作為",["透明漆","底漆","中塗漆","面漆"],2],
+        [3,"雙軌研磨機的偏心軸距使用順序是",["7→5→3","7→3→5","3→5→7","5→3→7 mm"],1],
+        [4,"下列何者是改變材料本身的組成，以減少被腐蝕的方法",["空氣調節處理","改善操作條件","增加材料化學組成之均勻性","添加腐蝕抑制劑"],3],
+        [5,"危害物圖示之象徵符號為骷髏與兩根交叉腿骨，表示是",["腐蝕性","禁水性","有毒性","易燃性"],3],
+        [6,"鐵與空氣中的氧及水發生化學反應，會生成",["鑄鐵","生鐵","鐵銹","純鐵"],3],
+        [7,"勞工安全衛生法是保障何者的安全與健康",["勞工","事業單位","雇主","負責人"],1],
+        [8,"每一道底漆或面漆都必須要有自然乾燥時間讓溶劑揮發一下，如因省略掉時，則很容易發生",["起霧","魚眼(火山口)","針孔","色差"],3],
+        [9,"目視法調色，對色時的最佳自然光時間是",["日出三小時後，日落三小時前","傍晚","清晨","早上6:30~下午5:30"],1],
+        [10,"等著色量藍與等著色量黃可以調出的色彩是",["紅","藍","紫","綠"],4],
+        [11,"三聚氰胺樹脂塗料藉何種方式乾燥硬化",["氧化聚合","紫外線","水份","熱"],4],
+        [12,"相同的二個灰色板，置於何種色板上會比較灰暗",["白色","綠色","黑色","黃色"],1],
+        [13,"職場上，除工作能力表現外，仍須何種配合方能更上層樓",["勇往直前","自我表現","和諧處事","孤芳自賞"],3],
+        [14,"甲醇對人體之危害主要在",["紅血球","視覺神經","肝","胃"],2],
+        [15,"用近紅外線烘烤系統裡，那一個產生昇溫較快",["白","灰","黑","銀"],3],
+        [16,"乙酸乙酯的八小時日時量平均容許濃度是",["200","400","600","800 ppm"],2],
+        [17,"一般無機顏料遮蓋力要比有機顏料遮蓋力",["好","一樣","不能比較","差"],1],
+        [18,"所謂色彩三原色為",["紫、黑、白","紅、黃、藍","紅、綠、黃","黑、黃、藍"],2],
+        [19,"塗裝之過濾網目結構越密，其品質",["越好","越壞","依技術規範使用","無關"],3],
+        [20,"噴槍的口徑愈大時",["空氣噴出量較少","空氣噴出量較多","塗料噴出量較少","塗料噴出量較多"],4],
+        [21,"噴槍運行速度以每秒約",["30~60公分","100~150公分","10~20公分","70~100公分"],1],
+        [22,"砂紙番號越大，其研磨顆粒",["無關","越大","越小","越尖銳"],3],
+        [23,"有機溶劑中毒預防規則規定，設置之局部排氣裝置，於使用、拆卸、改裝或修理時，應實施",["自動檢查","檢點","重點檢查","巡視"],3],
+        [24,"局部小補修時，所使用噴槍的噴塗壓力應該比整車噴塗時要",["高","無關","低","一樣"],3],
+        [25,"俗名氯仿之有機溶劑，具芳香味，對肝臟及神經組織具強烈毒性，其學名是",["三氯乙烷","二氯乙烷","三氯甲烷","二氯甲烷"],3],
+        [26,"利用熱風噴烤漆房時，必須測量房內的",["光度","濕度","溫度","風量"],3],
+        [27,"在工作職場中比專業技術還重要的是",["愛心","耐心","工作的態度","信心"],3],
+        [28,"下地處理不良所造成的缺陷，下列現象何者較為可能",["粉狀脫落","起霧","起皺","粒物"],3],
+        [29,"預防化學品過量暴露，最根本的方法是",["採用工程控制","配戴個人防護具","實施環境測定","採用危害性較低的化學品"],4],
+        [30,"危害物圖示之象徵符號為黑色液體自兩個玻璃容器倒在手上與金屬片上，表示是",["禁水性","有毒性","腐蝕性","易燃性"],3],
+        [31,"噴塗中產生斷漆、色斑、絲狀的原因是",["壓縮空氣不足、塗料粘度高","壓縮空氣不足、塗料粘度低","壓縮空氣大、塗料粘度低","壓縮空氣大、塗料粘度高"],1],
+        [32,"色彩的鮮豔度稱為",["亮度","色相","彩度","明度"],3],
+        [33,"聚氨基甲酸酯(PU)塗料如加入硝化纖維素噴漆用香蕉水會發生",["白化","橘子皮","高光澤","小氣泡與針孔"],4],
+        [34,"舊漆面在進行補修時",["可直接噴塗新漆","先剝離舊漆","先研磨","先測試及辨別舊塗膜材料的種類及特性後選擇適合的方式進行補修作業"],4],
+        [35,"噴槍移動過快易造成",["起泡","流漆","塗膜過薄","針孔"],3],
+        [36,"可燃性液體或氣體引起之火災，不可用何者作為滅火劑",["二氧化碳","鹵化烷","水","泡沫"],3],
+        [37,"塗裝工程時如未注意原漆(舊塗膜)之性質會造成",["白化","垂流現象","層間剝離","遮蓋力不好"],3],
+        [38,"防護面具每次使用過後應",["放入塑膠袋內，置於乾爽的地方","放在噴塗作業區，以利取用","使用香蕉水擦拭洗淨","放在通風處，保持乾爽"],1],
+        [39,"主要會影響塗料的噴出量是",["氣帽","噴嘴","氣壓調整閥","噴幅大小"],2],
+        [40,"現代企業在組織上有不同單位，這些單位彼此應",["相互競爭","相互合作","互不信任","彼此互相猜疑"],2],
+        [41,"下列敘述何者有誤",["紅色的互補色是藍色","黃色之互補色是藍紫色","紅色之鄰近色是黃紅色和紅紫色","綠色之鄰近色是黃綠色和藍綠色"],1],
+        [42,"塗料的吐出量是由下列何者的開度來控制",["噴嘴與氣帽","噴幅與吐出量","噴幅與空氣壓力","針閥與錐形"],4],
+        [43,"補修調色前必須將舊漆膜以何者擦拭後再行比對顏色",["研磨膏","水","香蕉水","松香水"],1],
+        [44,"從事噴漆作業時，應該使用下列何種呼吸防護具最佳",["防塵口罩","供氣式防毒面罩","過濾式防毒面罩","綿紗口罩"],2],
+        [45,"空氣壓縮機放置的位置，為了良好的散熱效果，最好離牆壁",["20公分左右","10公分左右","100公分以上","30公分以上"],4],
+        [46,"在顏色空間裡需要幾個空間(維度)來表示一個顏色？",["16","3","無","6"],2],
+        [47,"塑膠補土如果過於乾燥時，可以添加多少以內的苯乙烯單量體(SM)充份攪拌後使用",["20%","40%","10%","30%"],3],
+        [48,"配方中的色母種類過多比較會影響",["彩度","光澤度","明度","色相"],1],
+        [49,"影響塗膜厚度主要因素",["塗料黏度","塗料附著力","素材面之粗細度","浸塗時間"],1],
+        [50,"噴塗完成透明漆後塗膜發現有髒粒，應於透明漆何時才可以施行塗膜補救作業",["濕潤","完全乾燥硬化","微濕","微乾之後"],2],
+        [51,"調整消光劑之添加比率，可調整成",["1/4平光、半平光與全平光塗膜","半平光與全平光塗膜","只有全平光塗膜","只有半平光塗膜"],1],
+        [52,"珍珠銀粉漆添加銀粉色母會使彩度",["不變","變黑","降低","昇高"],3],
+        [53,"樹脂又稱為",["平衡劑","緩乾劑","接著劑","固漆劑"],4],
+        [54,"噴槍空氣罩與噴嘴之間隙過大，會使",["噴塗流量過小","沒有噴塗壓力","霧化不均","噴塗流量過大"],3],
+        [55,"攪拌塗料最佳工具為",["銅棒","不銹鋼棒","木棒","玻璃棒"],2],
+        [56,"二液型塗料是由下列何者組成？",["主劑和硬化劑","柔軟劑與主劑","硬化劑和溶劑","主劑和溶劑"],1],
+        [57,"香蕉水或稀釋劑等有機溶劑所產生之危害因子為",["粉塵","蒸氣","氣體","燻煙"],2],
+        [58,"調色指南中，如果需要微調修正時，色母的選擇應當",["優先使用最後一個色母","優先使用配方中已有的色母","優先使用配方以外的色母","優先使用第一個色母"],2],
+        [59,"在使用個人防護設備時，宜作何種處理，以確保能隨時保持有效狀態",["不定期","隨時","不需要","定期保養與測試"],4],
+        [60,"噴塗伐銹底漆的標準厚度是",["3~7µm","13~17µm","33~37µm","23~27µm"],1],
+        [61,"可以防止舊塗膜的顏色溶至上層塗膜的漆是",["面漆","透明漆","封底漆","中塗漆"],3],
+        [62,"空氣霧化型噴槍空氣罩之側(角)孔堵塞時，會發生",["噴塗斷斷續續","噴霧形狀不良","噴塗塗料滴漏","噴塗塗料霧化不良現象"],2],
+        [63,"室內空氣品質的好壞，一般是以空氣中的何者作為指標",["二氧化碳","氧氣","氮氣","一氧化碳"],1],
+        [64,"用來連接顏料與顏料，並賦予塗膜光澤的物質是",["樹脂","稀釋劑","柔軟劑","緩乾劑"],1],
+        [65,"酒精是屬於何系列溶劑",["醇系","酮系","焦油系","酯系"],1],
+        [66,"除去金屬表面的黑皮是屬於何種性質的作業",["增厚","除銹","脫脂","填補抑制"],2],
+        [67,"二液型素色面漆噴塗一次的乾膜厚，大約為",["50µm","10µm","5µm","20µm"],4],
+        [68,"冬天溫度低塗膜乾燥慢，應該用快乾性",["稀釋劑","接合劑","硬化劑","柔軟劑"],1],
+        [69,"可視光波，依波長由短至長的排列順序是",["紫-黃-橙-藍-綠-紅","紫-藍-綠-黃-橙-紅","紅-綠-黃-橙-紫-藍","紅-橙-黃-綠-藍-紫"],2],
+        [70,"噴塗底漆及面漆時，應",["保持通風，不需戴防護面具","戴防塵口罩","戴防護面具","戴活性碳口罩"],3],
+        [71,"各種波長所呈現的顏色名稱叫",["補色","明度","彩度","色相"],4],
+        [72,"當車輛噴塗時，直接穿戴在身上以防止危害，並將受害程度降至最低的一種防護稱為",["個人防護裝備","大衣","防水裝備","救生衣"],1],
+        [73,"打開空氣壓縮機的排水閥排除油水，至少每間隔多少時間一次",["一日","一月","一週","一季"],1],
+        [74,"補修的噴槍速度應為",["900~1200cm/min","900~1200cm/sec","90~120cm/sec","9~12cm/sec"],3],
+        [75,"鍍鋅金屬板施工應",["先噴塗伐銹底漆做基底後再施工","先噴塗中塗底漆填充細孔，整平表面後再施工","先用溶劑擦拭後再噴塗面漆塗料","可直接噴塗面漆塗料"],1],
+        [76,"塗料經噴塗後在塗膜面上出現細小類似火山口狀是何種現象",["開裂","魚眼","起泡","起痱子"],2],
+        [77,"如果要判斷補土的硬化狀況，應該檢查",["觸摸鐵皮的溫度","補土厚的部位","補土最高部位","補土較薄部位"],4],
+        [78,"調色時應使用",["對面色","愈多種顏色愈好","互補色","相鄰色"],4],
+        [79,"刮塗補土要分數次薄薄地塗，不可一次厚塗，以避免補土層內產生",["氣孔","垂流","橘子皮","魚眼"],1],
+        [80,"補修塗裝須在塗膜何時之後實施",["不黏塵乾燥","硬化乾燥","指觸乾燥","完全硬化乾燥"],4]
+      ],
+      "105": [
+        [1,"塗裝時發生垂流之原因之一為",["塗料噴嘴口太小","噴槍太接近被塗面","噴槍移動太快","塗料噴塗吐出量太少"],2],
+        [2,"對於HVLP環保噴槍，下列敘述何者有誤",["較傳統式噴槍傳遞效率高","噴塗耗氣量較傳統式噴槍小(公升/分鐘)","噴塗距離較傳統式噴槍短","較傳統式噴槍節省漆料"],2],
+        [3,"相同的二個灰色板，置於何者板上會比較灰暗",["黃色","綠色","白色","黑色"],3],
+        [4,"可燃性液體或氣體引起之火災，不可用何者作為滅火劑",["水","鹵化烷","二氧化碳","泡沫"],1],
+        [5,"塑膠保桿以鐵絲刮其內側不易刮傷的是",["PP","PVC","PE","PU"],1],
+        [6,"第一種有機溶劑混存物，係指含有第一種有機溶劑佔該混存物重量",["百分之三以上","百分之二以上","百分之五以上","百分之四以上"],3],
+        [7,"三原色中任意二色相加(調合)的結果稱為",["第一次色","第四次色","第二次色","第三次色"],3],
+        [8,"補土與硬化劑混合比例，正確應為",["2~3%","1~2%","5~6%","不一定"],1],
+        [9,"用粘度杯測量塗料粘度時，由開始將黏度杯提高離塗料表面算起至何時經過之秒數",["剩下最後一滴","由連續線狀呈現不連續的瞬間","剩下最後2、3滴","待測量的量杯內的塗料滴完為止"],2],
+        [10,"長橢圓形噴幅之疊塗比例應該是噴幅寬度的",["1/2","1/5","1/4","1/3"],4],
+        [11,"預防化學品過量暴露，最根本的方法是採用何種化學品",["危害性高","價格昂貴","危害性低","價格便宜"],3],
+        [12,"勞工於任何時間暴露在有害污染物下，皆不得超過此濃度，係指",["致死濃度","短時間時量平均容許濃度","時量平均容許濃度","最高容許濃度"],4],
+        [13,"素色漆，白色系加入30%以上的白色色母，會促進白度感及偏向",["降低明亮度","提高明亮度","帶點藍色調","帶點綠色調"],2],
+        [14,"綠色的波長要比橙色的波長",["無法比較","長","短","一樣"],3],
+        [15,"勻化稀釋劑(俗稱接咀香蕉水)的揮發型態是屬於",["不揮發型","中乾型","快乾型","慢乾型"],4],
+        [16,"使用二液型塗料時，添加硬化劑比率不當，則可能造成",["橘子皮現象","乾燥異常","氣泡現象","銀粉不均勻現象"],2],
+        [17,"HVLP噴槍是指何種噴槍",["低噴塗流量低空氣壓力","高噴塗流量低空氣壓力","高噴塗流量高空氣壓力","低噴塗流量高空氣壓力"],2],
+        [18,"顏色標準是以何者作最後審查",["紅外線燈","光澤計","人眼","電子顯微鏡"],3],
+        [19,"以空氣霧化型噴槍噴塗，一般將面漆塗料稀釋(福特4號黏度杯)，調整黏度時間為",["16~25秒","46~55秒","6~15秒","36~45秒"],1],
+        [20,"下列何者為空氣乾燥型之塗料",["氧化聚合乾燥型","使樹脂與硬化劑混合","二液聚合乾燥型","硝化棉噴漆"],1],
+        [21,"色漆塗膜表層有些髒粒子，大多來自於",["透明漆乾燥太快","溫度控制不當","色漆乾燥太慢","顏料沒有過濾"],4],
+        [22,"色彩的明暗度稱為",["色相","明度","彩度","亮度"],2],
+        [23,"噴槍的哪一部分可以把自噴嘴前端圓錐狀的塗料粒子壓向兩側成扁平狀",["噴嘴","空氣罩主空氣孔","空氣罩側面空氣孔","空氣罩輔助空氣孔"],3],
+        [24,"噴塗汽車的色漆塗料(DIN4)較適合黏度調整大約是",["10~14秒","15~18秒","23~26秒","19~22秒"],2],
+        [25,"我們感受到顏色所必須具備之條件，下列何者為非",["光源","眼睛","物體","投射鏡"],4],
+        [26,"噴塗鈑件時，若調整噴槍的塗料流量小，噴塗速度要如何以獲得較平滑的漆面",["無關","慢","快","不變"],2],
+        [27,"下列那種溶劑的毒性高，故不能作為塗料的稀釋溶劑",["苯乙烯","二甲苯","甲苯","苯"],4],
+        [28,"使用磷酸皮膜劑時，為保護手部應戴上",["棉紗手套","乳膠手套","塑膠手套","橡膠手套"],4],
+        [29,"使用高沸點溶劑來塗裝的話，表層乾燥的速度較",["快","不影響","特快","慢"],4],
+        [30,"羽狀邊作不好時，在噴完上塗後將會浮現明顯的",["針孔、氣泡","邊緣線","砂紙痕","泛黃"],2],
+        [31,"參閱顏色配方表，並以電子秤得到想要的塗料顏色，此一過程稱",["計件調色","計時調色","計算調色","計量調色"],4],
+        [32,"汽油是屬於下列何種法規列管之物質",["鉛中毒預防規則","粉塵危害預防標準","缺氧症預防規則","有機溶劑中毒預防規則"],4],
+        [33,"如果您選擇微調，您應當",["只使用配方裡的色母","只使用鮮艷色母","使用互補色","使用所有色母"],1],
+        [34,"壓克力面漆噴塗完成後，最好約在何時撕去貼紙較為適當",["隔夜","20℃、1小時","3天夜","20℃、30分鐘後"],4],
+        [35,"軟性橡皮補土刮板適用於",["闊面","平面","斜面","曲面"],4],
+        [36,"噴塗時噴槍與被塗物應保持幾度為原則",["60度","30度","45度","90度"],4],
+        [37,"塗裝的最大目的是",["保護車體","價值感","美觀作用","增加強度"],1],
+        [38,"在二液重合型當中，其烘烤溫度大都提昇在",["60℃~80℃","60℃~70℃","50℃~80℃","根本不用烘烤"],2],
+        [39,"乾燥過程中，以何時之塗膜硬度最高",["完全乾燥","沾塵乾燥","硬化乾燥","指觸乾燥"],1],
+        [40,"新車塗膜結構所謂4C3B意指在塗膜形成的過程中，經過",["4次噴塗、3次研磨","4次研磨、3次噴塗","4次烘烤、3次噴塗","4次噴塗、3次烘烤"],4],
+        [41,"下列那一項噴槍零件，係用來霧化塗料",["塗料調整螺絲","氣壓調整螺絲","流量閥","空氣罩"],4],
+        [42,"噴槍的空氣罩堵住，可用何物清理",["小刀","木籤","鋼絲","鐵片"],2],
+        [43,"職業安全衛生法的主管機關，在中央為",["衛生福利部","勞動部","行政院原子能委員會","行政院公共工程委員會"],2],
+        [44,"塗料中添加硬化劑之主要目的是使分子間發生何種作用",["揮發","架橋","混合","互溶"],2],
+        [45,"空氣霧化型噴槍的噴幅變化是以何者來調整",["空氣流量鈕","塗料鈕","空氣罩的側孔","空氣罩的中心孔"],3],
+        [46,"從事噪音作業時，應該使用下列何種防護具？",["防塵口罩","防護眼鏡","防毒面罩","耳塞"],4],
+        [47,"研磨砂紙的號數愈大，其研磨顆粒愈",["無號數之分","小","大","不一定"],2],
+        [48,"塗料中添加緩乾劑，會增加塗膜的",["亮度","乾燥性","平坦性","厚度"],3],
+        [49,"防止塗膜白化在塗料中可添加",["定色劑","緩乾稀釋劑","摧乾劑","抗魚眼劑"],2],
+        [50,"工作的意義在於",["賺錢","消磨時間","自我實現","浪費生命"],3],
+        [51,"不飽合聚酯補土之收縮量較硝化纖維素油性補土為",["大","小","不能比較","一樣"],2],
+        [52,"依曼氏(MUNSELL)之色立體圖，在中心軸上的是",["厚度","明度","彩度","色相"],2],
+        [53,"因少量有毒物質未能完全排出，逐漸累積造成之傷害稱為",["慢性","水性","乾性","急性 中毒"],1],
+        [54,"連接噴槍的橡膠軟管的長度，與噴塗作業時的何者有直接關係",["方向","噴塗幅度","速度","空氣壓力"],4],
+        [55,"可視光波，依波長由短至長的排列順序是",["紫-黃-橙-藍-綠-紅","紅-綠-黃-橙-紫-藍","紫-藍-綠-黃-橙-紅","紅-橙-黃-綠-藍-紫"],3],
+        [56,"在樹脂中藉由化學反應而固化的是",["熱提煉樹脂","熱可塑性樹脂","熱硬化樹脂","熱分解樹脂"],3],
+        [57,"事業單位發生勞工死亡之職業災害時，雇主應於多久內向檢查機關報告",["12小時","8小時","48小時","36小時"],2],
+        [58,"下列何者是有機溶劑進入人體之主要途徑？",["消化器官","皮膚","呼吸器官","眼睛"],3],
+        [59,"修補作業如果研磨至裸鋼時，應做下列何處理？",["噴中塗漆","直接補土","噴防銹底漆","直接噴塗面漆"],3],
+        [60,"研磨補土時，選用砂紙的順序，最佳為",["#120→#240→#180→#320","#320→#240→#180→#120","#120→#180→#240→#320","#240→#180→#120→#320"],3],
+        [61,"遮蔽反貼法可以避免",["塗膜失亮","塗膜段差","節省料材","打腊工作"],2],
+        [62,"靜電蓄積達一定量時",["會迸出火花","可用於乾燥","不會迸出火花","有利於靜電塗裝"],1],
+        [63,"要獲得均勻的塗膜，適當的重疊寬度以何者作為參考依據",["噴槍角度","噴幅","漆的吐出量","噴槍距離"],2],
+        [64,"俗名氯仿之有機溶劑，具芳香味，學名是",["三氯甲烷","二氯甲烷","二氯乙烷","三氯乙烷"],1],
+        [65,"影響塗膜厚度的主要因素為",["塗料黏度","浸塗時間","素材面之粗細度","塗料附著力"],1],
+        [66,"等著色量的綠色與等著色量的紅色，其所調出來的顏色應該是",["紅色","紫色","灰色","藍色"],3],
+        [67,"調色時，應先選擇用",["補色","鄰近色","灰色","相對色"],2],
+        [68,"二液型塗料是由下列何者組成？",["主劑和硬化劑","硬化劑和溶劑","主劑和溶劑","柔軟劑與主劑"],1],
+        [69,"具有溝通、協調、統合及組織能力的人，適合從事下列何種工作？",["研究","技師","教學","管理"],4],
+        [70,"砂紙選擇，如現用#100砂紙，接著再選擇之砂紙應為",["#600~#1200","#240~#320","#120~#180","#400~#600"],3],
+        [71,"不飽和聚酯補土與硬化劑之混合比例約為",["100:3~4","100:1~2","100:4~5","100:2~3"],4],
+        [72,"用來連接顏料與顏料，並賦予塗膜光澤的物質是",["緩乾劑","稀釋劑","柔軟劑","樹脂"],4],
+        [73,"二氧化鈦是屬於何種顏料",["黑色","白色","黃色","藍色"],2],
+        [74,"使用重力式噴槍噴塗二液型中塗塗料時，應選擇何種噴槍口徑最佳",["1.6~2.0 mm","2.1~2.5 mm","1.3~1.5 mm","1.0~1.2 mm"],1],
+        [75,"噴塗底漆及面漆時，應",["戴防護面具","戴防塵口罩","戴活性碳口罩","保持通風，不需戴防護面具"],1],
+        [76,"補土施工要領第一道是",["用力刮塗且厚塗","輕輕刮塗且厚塗","用力刮塗且薄塗","輕輕刮塗且薄塗"],3],
+        [77,"塗裝作業場所之照明及通風設備應具",["防爆型","防水型","防熱型","防震型"],1],
+        [78,"苯之毒性較甲苯為",["大","兩者皆無害","小","一樣"],1],
+        [79,"噴塗作業環境之有機溶劑濃度是否超過容許濃度，正確應由何者偵測出來",["觸覺","嗅覺","視覺","儀器"],4],
+        [80,"履歷表的撰寫應注意",["捨短取長","簡明扼要","意在言外","長篇大論"],2]
+      ],
+      "106": [
+        [1,"下列何組較可能調配出紫色",["藍、白、黑","紅、黃、綠","紅、黃、黑","紅、藍、白"],4],
+        [2,"素色塗料乾燥後的顏色比濕的顏色",["淺","白","沒變化","深"],4],
+        [3,"調配混合漆料時，哪一種顏色塗料添加愈多時，明度越高",["紅色","黑色","黃色","白色"],4],
+        [4,"塗料儲存應於何處所",["不通風但需受日光直接照射","不通風但避免日光直接照射","通風良好且避免日光直接照射","通風良好但需受日光直接照射"],3],
+        [5,"從事噴漆作業時，應該使用下列何種呼吸防護具最佳",["供氣式防毒面罩","防塵口罩","綿紗口罩","過濾式防毒面罩"],1],
+        [6,"作業環境溫度升高時，塗料的黏度狀況為",["黏度變低","黏度變高","黏度不變","與氣溫無關"],1],
+        [7,"用黏度杯測量塗料黏度時，測量秒數計至",["剩下最後一滴","由連續線狀呈現不連續的瞬間","剩下最後2、3滴","待測量的量杯內的塗料滴完為止"],2],
+        [8,"下列何種塗料之烘烤溫度最高且所需時間最長",["氨基樹脂硬化型環氧樹脂塗料","三聚氰胺樹脂塗料","乙烯縮醛樹脂塗料","矽利康樹脂塗料"],4],
+        [9,"下列何者非屬侷限空間作業定義？",["非供勞工在其內部從事經常性作業之空間","勞工進出方法受限制之空間","無法以自然通風來維持充分、清淨空氣之空間","動火作業場所"],4],
+        [10,"用來連接顏料與顏料，並賦予塗膜光澤的物質是",["樹脂","緩乾劑","稀釋劑","柔軟劑"],1],
+        [11,"利用熱風噴烤漆房時，必須測量房內的",["光度","溫度","風量","濕度"],2],
+        [12,"下列何者被認為屬於智慧財產權的一種，但是在我國尚未制定專法保護？",["專利權","商標權","鄰接權","著作權"],3],
+        [13,"下列所敘述之單位何者錯誤",["空氣壓縮機馬力用cm","噴塗空氣壓力用kg/cm²","塗料噴出量用cc/min","噴塗距離用cm 表示"],1],
+        [14,"TiO2 是指",["鋅銀白","白煙","鋅白","鈦白"],4],
+        [15,"異物堵塞於噴槍空氣罩的側面孔阻塞時會發生",["噴幅不良","噴不出來","垂流","塗料霧化不良"],1],
+        [16,"噴塗鈑件時，若調整噴槍的塗料流量小，噴塗速度要如何以獲得較平滑的漆面",["不變","無關","快","慢"],4],
+        [17,"噴塗時噴槍與被塗物應保持幾度為原則",["30度","45度","60度","90度"],4],
+        [18,"整車外表塗裝依順序應先噴塗何處以減少漆塵污染",["右前葉","引擎蓋","車頂","左前葉"],3],
+        [19,"最會吸收光源熱能的顏色是",["黑色","白色","紅色","灰色"],1],
+        [20,"員工想要融入一個組織當中，下列哪一個做法較為可行？",["經常拜訪公司的客戶","經常送禮物給同事","經常加班工作到深夜","經常參與公司的聚會與團體活動"],4],
+        [21,"製作羽狀邊，邊緣寬度大約是",["30mm","300mm","3000mm","3mm"],1],
+        [22,"二液型塗料混合攪拌放置一段時間後，發覺表面結皮時",["立刻充分攪拌後才可塗裝","須更換塗料重新調配","除掉結皮即可塗裝","除掉結皮充分攪拌後才可塗裝"],2],
+        [23,"緩乾稀釋劑有減緩塗膜表面何種缺陷的效果",["白化","軟化","粗糙","橘子皮"],4],
+        [24,"珍珠漆是以人造方式將天然雲母表面被覆著",["氧化鋁","氧化鐵","二氧化碳","二氧化鈦"],4],
+        [25,"預防化學品過量暴露，最根本的方法是",["配戴個人防護具","實施環境測定","採用工程控制","採用危害性較低的化學品"],4],
+        [26,"補土與硬化劑之混合比例，若高於3%時，易造成塗膜",["沒有影響","龜裂","滲色","密著性較佳"],3],
+        [27,"噴槍操作時，如因速度不均會使塗膜",["失艷","厚度不均勻","橘皮","流漆"],2],
+        [28,"環氧樹脂塗料的種類有",["只有一液型","只有二液型","一液型、二液型及多液型","一液型及二液型"],4],
+        [29,"調漆室內之牆壁，為了避免產生比對顏色之干擾，所以應選用",["淺灰色","淺黃色","淺白色","淺黑色"],1],
+        [30,"噴槍的口徑愈大時",["塗料噴出量較少","塗料噴出量較多","空氣噴出量較少","空氣噴出量較多"],2],
+        [31,"HVLP 噴槍尖端應與被塗面保持正確距離為",["20~25公分","任意調整","10~15公分","30~45公分"],3],
+        [32,"珍珠銀粉漆添加銀粉色母會使彩度",["變黑","昇高","不變","降低"],4],
+        [33,"下列何者屬暖色系列",["銀色","藍色","黑色","粉紅色"],4],
+        [34,"打臘時，使用拋刮臘前可灑少量何種物質於表面以避免過熱並促進潤滑",["稀釋劑","清水","酒精","溶劑"],2],
+        [35,"下列各種番號砂紙中，何者之研削材料粒度最大",["#200","#100","#800","#400"],2],
+        [36,"噴塗中塗漆前，乾磨以何種番號砂紙最適當",["#80","#400","#120","#240"],4],
+        [37,"從事有機溶劑作業時，應配戴安全眼鏡與",["塑膠手套","耐溶劑手套","棉紗手套","不需戴手套操作"],2],
+        [38,"使用封底漆最主要功能為",["整平","防止補土凹痕","隔離","填孔"],3],
+        [39,"二液型烤漆如果塗裝完成後要加以強制乾燥烘烤時，適當的烘烤溫度為",["40-59℃","100℃以上","60-80℃","81-100℃"],3],
+        [40,"下列何者非屬法定勞動檢查結果之處理？",["公告違法事業單位","警告","停工","移送司法機關偵辦"],2],
+        [41,"噴烤漆房通風系統設置時必須考慮到法規要求的控制風速與",["空間大小","美觀","光線","換氣量"],4],
+        [42,"下列何者為非",["靜電塗裝是使塗料帶負電、車身帶正電","噴槍的作業是基於霧化的原理","溫度高時黏度高、溫度低時黏度低","在補修必須使用量色技巧"],3],
+        [43,"添加塗料倒入塗料杯中最好不要超過塗料杯容積的",["50%","80%","30%","100%"],2],
+        [44,"如需使用砂紙研磨整平後再進行研磨膏塗膜表面(拋光)處理時，最終應選用何者較為適當",["#1500","#800","#1000","#600"],1],
+        [45,"補修的噴槍速度應為",["900~1200cm/min","900~1200cm/sec","90~120cm/sec","9~12cm/sec"],3],
+        [46,"「物質安全資料表」內容之正確性，至少每幾年更新一次",["一年","四年","三年","二年"],3],
+        [47,"在顏色空間裡需要幾個維度(空間)來表示一個顏色？",["16","6","3","無"],3],
+        [48,"事業單位僱用勞工多少人以上者，應依勞動基準法規定訂立工作規則？",["50人","30人","200人","100人"],2],
+        [49,"勞工於短時間內連續暴露在有害污染物裡所能容許的最高濃度，係指",["短時間時量平均容許濃度","最高容許濃度","動物50%致死濃度","時量平均容許濃度"],1],
+        [50,"對於顏色能夠分辨深淺度之屬性稱為",["亮度","明度","色相","彩度"],2],
+        [51,"雙軌研磨機的偏心軸距使用順序是",["5→3→7","7→5→3","3→5→7","7→3→5 mm"],2],
+        [52,"作業過程中為預防粉塵、溶劑等異物傷及眼睛，必須配帶",["安全眼鏡","防塵口罩","手套","安全帽"],1],
+        [53,"我們能感受到物體顏色的條件，下列何者為非",["接受反射光線的接受器","光源","光波","反射光線的物體"],3],
+        [54,"公務機關或非公務機關個人資料爭議，當事人提出請求時，機關不得逾幾日之期限提出准駁？",["30日","7日","15日","14日"],1],
+        [55,"噴槍的哪一部分可以把自噴嘴前端圓錐狀的塗料粒子壓向兩側成扁平狀",["噴嘴","空氣罩側面空氣孔","空氣罩輔助空氣孔","空氣罩主空氣孔"],2],
+        [56,"不飽和聚酯補土(俗稱塑膠土)刮塗的標準厚度應在多少以下",["3吋","30厘米","3厘米","30吋"],3],
+        [57,"可見光波中，波長較長為",["紅色","綠色","黃色","藍色"],1],
+        [58,"塗料乾燥到能夠安裝零件的程度稱之為",["指觸乾燥","完全乾燥","初期乾燥","中期乾燥"],4],
+        [59,"使用於油性漆料的毛刷需長期保存時，用塗料稀釋劑洗淨後，應保持",["完全濕潤","乾燥","浸泡水中","微濕狀態"],4],
+        [60,"酒精是屬於何系列溶劑",["酮系","醇系","焦油系","酯系"],2],
+        [61,"使用機器研磨工具代替傳統手工研磨，其作業速度",["平均大約一樣","大約快一倍","大約快半倍","大約快三倍"],4],
+        [62,"在以塗料為材料之非金屬被覆防蝕中，是以何種特性的防蝕塗料用量最多且應用範圍最廣",["耐衝擊性","防銹性","耐藥品性","防水性"],2],
+        [63,"最不會吸收光源熱能的顏色是",["紅色","黑色","灰色","白色"],4],
+        [64,"中塗漆施工的說法下列何者為錯誤？",["若有些許補土裸露出來，因為不影響品質，故不必理會它","研磨中塗漆噴塗區域需將其邊緣磨薄","使用400號砂紙研磨中塗漆後，可再使用600號砂紙修飾磨除砂紙痕","因中塗漆具有整平的功能，研磨時須小心"],1],
+        [65,"鋁粉屬於下列何種物質",["引火性物質","爆炸性物質","氧化性物質","著火性物質"],4],
+        [66,"利用外界的自然風力及室內外的溫度差異原理達到換氣目的，稱為",["局部排氣裝置","自然換氣","密閉設備","整體換氣裝置"],2],
+        [67,"硫酸屬於下列何種物質",["腐蝕性物質","刺激性物質","毒性物質","氧化性物質"],1],
+        [68,"汽油是屬於下列何種法規列管之物質",["有機溶劑中毒預防規則","鉛中毒預防規則","粉塵危害預防標準","缺氧症預防規則"],1],
+        [69,"下列哪一種工作態度並不足取？",["在公司內使用E-mail時，任意發送與工作無關的訊息給同仁","工作時注重細節，以追求最高的工作品質為目標","在公司規定上班時間之前，就完成上工的一切準備動作","在工作時喜歡團隊合作，與其他同仁充分人際互動"],1],
+        [70,"素色漆乾燥後顏色更深，是色母何種因素影響",["比重","黏度","濃度","亮度"],1],
+        [71,"在進行調色時，為達能較直接降低顏色彩度效果，可選用何種色母較適當",["鄰近色","特殊色","對比色","對補色"],4],
+        [72,"下列何者非屬勞工從事電氣工作，應符合之規定？",["穿戴棉質手套絕緣","停電作業應檢電掛接地","使其使用電工安全帽","穿戴絕緣防護具"],1],
+        [73,"塗膜重疊處發生滴流現象，表示噴槍移動",["速度太慢","是自然現象","速度太快","與速度無關"],1],
+        [74,"在溫、濕度高的作業環境下，實施塗裝時，易造成何種現象",["針孔","白化","橘子皮","魚眼"],2],
+        [75,"NC硝化棉的乾燥型態應屬",["自我反應型","空氣乾燥型","溶劑揮發乾燥型","二液重合型"],3],
+        [76,"處理化學物後須徹底洗手是工作時個人應有的",["潔癖","安全衛生","避免被責備","形式化習慣"],2],
+        [77,"一般可燃性固體如木材、紙張、紡織品、橡膠等所引起之火災，稱為",["丁類","甲類","丙類","乙類 火災"],2],
+        [78,"氧化鐵與氧化鈦顏料屬於",["有機顏料","含鉛顏料","無機顏料","含汞顏料"],3],
+        [79,"聚胺酯塗料如果加入硝化纖維素塗料溶劑會發生",["橘子皮","高光澤","白化","小氣泡與針孔"],4],
+        [80,"室內空氣品質的好壞，一般是以空氣中的何者作為指標",["一氧化碳","二氧化碳","氦氣","氧氣"],2]
+      ]
+    };
+
+    // 系統狀態
+    let currentYear = '104';
+    let currentMode = 'study'; // 'study' | 'instant' | 'exam'
+    let userAnswers = { '104': {}, '105': {}, '106': {} };
+    let isSubmitted = { '104': false, '105': false, '106': false };
+    let showWrongOnly = false;
+    let searchQuery = '';
+
+    // 初始化跳題選單
+    function initJumpSelect() {
+      const select = document.getElementById('jumpSelect');
+      select.innerHTML = '<option value="">選擇題號...</option>';
+      for (let i = 1; i <= 80; i++) {
+        select.innerHTML += `<option value="q-${i}">第 ${i} 題</option>`;
+      }
+    }
+
+    function jumpToQuestion(id) {
+      if (!id) return;
+      const el = document.getElementById(id);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    // 切換模式
+    function setMode(mode) {
+      currentMode = mode;
+      
+      // 更新按鈕外觀
+      ['study', 'instant', 'exam'].forEach(m => {
+        const btn = document.getElementById(`mode-${m}`);
+        if (m === mode) {
+          btn.className = 'px-3 py-1.5 rounded-lg transition flex items-center gap-1 bg-white text-blue-700 shadow-sm font-bold';
+        } else {
+          btn.className = 'px-3 py-1.5 rounded-lg transition flex items-center gap-1 text-slate-600 hover:text-slate-800';
+        }
+      });
+
+      const submitBtn = document.getElementById('submitBtn');
+      const filterControl = document.getElementById('filterControl');
+
+      if (mode === 'study') {
+        submitBtn.classList.add('hidden');
+        filterControl.classList.add('hidden');
+        showWrongOnly = false;
+        updateStatusBar('📖 讀書背題模式：每題皆直接標示標準答案，專注理解與記憶');
+      } else if (mode === 'instant') {
+        submitBtn.classList.add('hidden');
+        filterControl.classList.add('hidden');
+        showWrongOnly = false;
+        updateStatusBar('⚡ 即時練習模式：點選選項立刻得知對錯與答案');
+      } else if (mode === 'exam') {
+        submitBtn.classList.remove('hidden');
+        filterControl.classList.remove('hidden');
+        updateStatusBar(isSubmitted[currentYear] ? getExamResultText() : '📝 模擬測驗模式：作答完畢請點擊右上角「交卷對答案」');
+      }
+
+      renderQuestions();
+    }
+
+    // 切換年度
+    function switchYear(year) {
+      currentYear = year;
+      ['104', '105', '106'].forEach(y => {
+        const tab = document.getElementById(`tab-${y}`);
+        if (y === year) {
+          tab.className = 'px-4 py-1.5 rounded-lg transition bg-white text-blue-700 shadow-sm font-black';
+        } else {
+          tab.className = 'px-4 py-1.5 rounded-lg transition text-slate-600 hover:text-slate-800';
+        }
+      });
+
+      if (currentMode === 'exam') {
+        updateStatusBar(isSubmitted[currentYear] ? getExamResultText() : '📝 模擬測驗模式：作答完畢請點擊右上角「交卷對答案」');
+      }
+      renderQuestions();
+    }
+
+    function updateStatusBar(text) {
+      document.getElementById('statusText').innerHTML = `<span>${text}</span>`;
+    }
+
+    function getExamResultText() {
+      const qList = RAW_QUESTIONS[currentYear];
+      const ansMap = userAnswers[currentYear];
+      let correctCount = 0;
+      qList.forEach(q => {
+        if (ansMap[q[0]] === q[3]) correctCount++;
+      });
+      const score = (correctCount * 1.25).toFixed(1);
+      const pass = score >= 60;
+      return `測驗結果：答對 ${correctCount}/80 題 · 得分 <strong class="text-base ${pass ? 'text-emerald-400' : 'text-rose-400'}">${score} 分</strong> (${pass ? '合格 🎉' : '未達60分及格'})`;
+    }
+
+    // 選取選項
+    function selectOption(qNum, optIdx) {
+      if (currentMode === 'study') return; // 背題模式不可點選
+      if (currentMode === 'exam' && isSubmitted[currentYear]) return; // 已交卷鎖定
+
+      userAnswers[currentYear][qNum] = optIdx;
+      renderQuestions();
+    }
+
+    // 交卷
+    function submitExam() {
+      const qList = RAW_QUESTIONS[currentYear];
+      const ansMap = userAnswers[currentYear];
+      const answeredCount = Object.keys(ansMap).length;
+
+      if (answeredCount < 80) {
+        if (!confirm(`您還有 ${80 - answeredCount} 題尚未作答，確定要現在交卷計算成績嗎？`)) {
+          return;
+        }
+      }
+      isSubmitted[currentYear] = true;
+      setMode('exam');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // 重置
+    function resetCurrentYear() {
+      if (confirm(`確定要重置 ${currentYear} 年度的作答紀錄嗎？`)) {
+        userAnswers[currentYear] = {};
+        isSubmitted[currentYear] = false;
+        showWrongOnly = false;
+        renderQuestions();
+        if (currentMode === 'exam') {
+          updateStatusBar('📝 模擬測驗模式：作答完畢請點擊右上角「交卷對答案」');
+        }
+      }
+    }
+
+    // 切換只看錯題
+    function toggleWrongOnly() {
+      showWrongOnly = !showWrongOnly;
+      const btn = document.getElementById('wrongOnlyBtn');
+      btn.className = showWrongOnly 
+        ? 'px-2 py-0.5 rounded bg-amber-400 text-slate-900 font-bold text-xs' 
+        : 'px-2 py-0.5 rounded bg-slate-700 hover:bg-slate-600 border border-slate-600 text-xs text-amber-300';
+      renderQuestions();
+    }
+
+    // 搜尋過濾
+    function handleSearch() {
+      searchQuery = document.getElementById('searchInput').value.trim().toLowerCase();
+      renderQuestions();
+    }
+
+    // 渲染題目
+    function renderQuestions() {
+      const container = document.getElementById('questionList');
+      const qList = RAW_QUESTIONS[currentYear];
+      const ansMap = userAnswers[currentYear];
+      const submitted = isSubmitted[currentYear];
+
+      let html = '';
+      let visibleCount = 0;
+
+      qList.forEach(item => {
+        const [qNum, qText, options, correctAns] = item;
+        const userChoice = ansMap[qNum];
+        const isAnswered = userChoice !== undefined;
+        const isCorrect = userChoice === correctAns;
+
+        // 搜尋過濾
+        if (searchQuery) {
+          const matchQ = qText.toLowerCase().includes(searchQuery);
+          const matchOpt = options.some(o => o.toLowerCase().includes(searchQuery));
+          if (!matchQ && !matchOpt) return;
+        }
+
+        // 錯題過濾 (模擬測驗交卷後)
+        if (showWrongOnly && isCorrect) return;
+
+        visibleCount++;
+
+        html += `
+          <div id="q-${qNum}" class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 transition">
+            <!-- 題幹 -->
+            <div class="flex items-start justify-between gap-3 mb-4">
+              <div class="flex items-start gap-2">
+                <span class="inline-flex items-center justify-center bg-slate-100 text-slate-700 text-xs font-black px-2.5 py-1 rounded-lg">
+                  第 ${qNum} 題
+                </span>
+                <h2 class="text-base font-bold text-slate-800 leading-snug pt-0.5">
+                  ${qText}
+                </h2>
+              </div>
+              ${currentMode === 'study' ? `
+                <span class="shrink-0 bg-emerald-100 text-emerald-800 text-xs font-bold px-2 py-1 rounded-md">
+                  答案：選項 (${correctAns})
+                </span>
+              ` : ''}
             </div>
-        </div>
-    </header>
 
-    <!-- 題目列表區 -->
-    <main class="max-w-4xl mx-auto px-4 mt-6">
-        <!-- 快速跳題導覽器 -->
-        <details class="mb-6 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-            <summary class="px-4 py-3 font-semibold text-sm text-slate-700 cursor-pointer hover:bg-slate-50 select-none flex items-center justify-between">
-                <span>📌 題號快速跳轉與作答狀態面板（點擊展開/收合）</span>
-                <span class="text-xs text-slate-400">共 80 題</span>
-            </summary>
-            <div id="questionGrid" class="p-4 border-t border-slate-100 grid grid-cols-8 sm:grid-cols-10 md:grid-cols-16 gap-1.5">
-                <!-- 由 JS 產生 -->
+            <!-- 選項 -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+        `;
+
+        options.forEach((optText, idx) => {
+          const optNum = idx + 1;
+          let optStyle = "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100";
+          let badge = `<span class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold bg-slate-200 text-slate-600 mr-2.5 shrink-0">${optNum}</span>`;
+
+          if (currentMode === 'study') {
+            // 📖 背題模式：直接將正確答案高亮成綠色
+            if (optNum === correctAns) {
+              optStyle = "border-emerald-500 bg-emerald-50/80 text-emerald-900 font-bold shadow-sm";
+              badge = `<span class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold bg-emerald-600 text-white mr-2.5 shrink-0">✓</span>`;
+            } else {
+              optStyle = "border-slate-200 bg-white text-slate-500 opacity-80";
+            }
+          } else if (currentMode === 'instant') {
+            // ⚡ 即時練習模式：點了立刻反饋
+            if (isAnswered) {
+              if (optNum === correctAns) {
+                optStyle = "border-emerald-500 bg-emerald-50 text-emerald-900 font-bold ring-2 ring-emerald-400";
+                badge = `<span class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold bg-emerald-600 text-white mr-2.5 shrink-0">✓</span>`;
+              } else if (optNum === userChoice) {
+                optStyle = "border-rose-400 bg-rose-50 text-rose-900 ring-2 ring-rose-400";
+                badge = `<span class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold bg-rose-500 text-white mr-2.5 shrink-0">✕</span>`;
+              } else {
+                optStyle = "border-slate-200 bg-white text-slate-400";
+              }
+            } else {
+              optStyle = "border-slate-200 bg-white text-slate-700 hover:border-blue-400 hover:bg-blue-50/30 cursor-pointer";
+            }
+          } else if (currentMode === 'exam') {
+            // 📝 模擬測驗模式
+            if (!submitted) {
+              if (optNum === userChoice) {
+                optStyle = "border-blue-600 bg-blue-50 text-blue-900 font-bold ring-2 ring-blue-500 cursor-pointer";
+                badge = `<span class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold bg-blue-600 text-white mr-2.5 shrink-0">${optNum}</span>`;
+              } else {
+                optStyle = "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50 cursor-pointer";
+              }
+            } else {
+              // 交卷後對答案
+              if (optNum === correctAns) {
+                optStyle = "border-emerald-500 bg-emerald-50 text-emerald-900 font-bold ring-2 ring-emerald-500";
+                badge = `<span class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold bg-emerald-600 text-white mr-2.5 shrink-0">✓</span>`;
+              } else if (optNum === userChoice) {
+                optStyle = "border-rose-400 bg-rose-50 text-rose-900 ring-2 ring-rose-400";
+                badge = `<span class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold bg-rose-500 text-white mr-2.5 shrink-0">✕</span>`;
+              } else {
+                optStyle = "border-slate-200 bg-white text-slate-400";
+              }
+            }
+          }
+
+          html += `
+            <div onclick="selectOption(${qNum}, ${optNum})" class="flex items-center px-3.5 py-2.5 rounded-xl border text-sm transition ${optStyle}">
+              ${badge}
+              <span class="leading-snug">${optText}</span>
             </div>
-        </details>
+          `;
+        });
 
-        <div id="quizContainer" class="space-y-4">
-            <!-- 題目由 JS 渲染 -->
-        </div>
-    </main>
+        html += `
+            </div>
+          </div>
+        `;
+      });
 
-    <script>
-        // 104、105、106年度 16400 車輛塗裝丙級 完整題庫 (共 240 題)
-        const allQuizData = {
-            "104": [
-                { id: 1, ans: 1, q: "1加侖約等於多少公升？", opts: ["3.785", "5.250", "4.000", "6.000"] },
-                { id: 2, ans: 2, q: "鍍鋅鋼板可使用防銹底漆(WASH PRIMER)作為：", opts: ["透明漆", "底漆", "中塗漆", "面漆"] },
-                { id: 3, ans: 1, q: "雙軌研磨機的偏心軸距使用順序是（mm）：", opts: ["7→5→3", "7→3→5", "3→5→7", "5→3→7"] },
-                { id: 4, ans: 3, q: "下列何者是改變材料本身的組成，以減少被腐蝕的方法？", opts: ["空氣調節處理", "改善操作條件", "增加材料化學組成之均勻性", "添加腐蝕抑劑"] },
-                { id: 5, ans: 3, q: "危害物圖示之象徵符號為骷髏與兩根交叉腿骨，表示是：", opts: ["腐蝕性", "禁水性", "有毒性", "易燃性"] },
-                { id: 6, ans: 3, q: "鐵與空氣中的氧及水發生化學反應，會生成：", opts: ["鑄鐵", "生鐵", "鐵銹", "純鐵"] },
-                { id: 7, ans: 1, q: "勞工安全衛生法是保障何者的安全與健康？", opts: ["勞工", "事業單位", "雇主", "負責人"] },
-                { id: 8, ans: 3, q: "每一道底漆或面漆都必須要有自然乾燥時間讓溶劑揮發一下，如因省略掉時，則很容易發生：", opts: ["起霧", "魚眼(火山口)", "針孔", "色差"] },
-                { id: 9, ans: 1, q: "目視法調色，對色時的最佳自然光時間是：", opts: ["日出三小時後，日落三小時前", "傍晚", "清晨", "早上6:30~下午5:30"] },
-                { id: 10, ans: 4, q: "等著色量藍與等著色量黃可以調出的色彩是：", opts: ["紅", "藍", "紫", "綠"] },
-                { id: 11, ans: 4, q: "三聚氰胺樹脂塗料藉何種方式而乾燥硬化？", opts: ["氧化聚合", "紫外線", "水份", "熱"] },
-                { id: 12, ans: 1, q: "相同的二個灰色板，置於何種顏色板上會比較灰暗？", opts: ["白色", "綠色", "黑色", "黃色"] },
-                { id: 13, ans: 3, q: "職場上，除工作能力表現外，仍須何種配合方能更上層樓？", opts: ["勇往直前", "自我表現", "和諧處事", "孤芳自賞"] },
-                { id: 14, ans: 2, q: "甲醇對人體之危害主要在：", opts: ["紅血球", "視覺神經", "肝", "胃"] },
-                { id: 15, ans: 3, q: "用近紅外線烘烤系統裡，那一個產生昇溫較快？", opts: ["白", "灰", "黑", "銀"] },
-                { id: 16, ans: 2, q: "乙酸乙酯的八小時日時量平均容許濃度是多少 ppm？", opts: ["200", "400", "600", "800"] },
-                { id: 17, ans: 1, q: "一般無機顏料遮蓋力要比有機顏料遮蓋力：", opts: ["好", "一樣", "不能比較", "差"] },
-                { id: 18, ans: 2, q: "所謂色彩三原色為：", opts: ["紫、黑、白", "紅、黃、藍", "紅、綠、黃", "黑、黃、藍"] },
-                { id: 19, ans: 3, q: "塗裝之過濾網目結構越密，其品質：", opts: ["越好", "越壞", "依技術規範使用", "無關"] },
-                { id: 20, ans: 4, q: "噴槍的口徑愈大時：", opts: ["空氣噴出量較少", "空氣噴出量較多", "塗料噴出量較少", "塗料噴出量較多"] },
-                { id: 21, ans: 1, q: "噴槍運行速度以每秒：", opts: ["30~60公分", "100~150公分", "10~20公分", "70~100公分"] },
-                { id: 22, ans: 3, q: "砂紙番號越大，其研磨顆粒：", opts: ["無關", "越大", "越小", "越尖銳"] },
-                { id: 23, ans: 3, q: "有機溶劑中毒預防規則規定，設置之局部排氣裝置，於使用、拆卸、改裝或修理時，應實施：", opts: ["自動檢查", "檢點", "重點檢查", "巡視"] },
-                { id: 24, ans: 3, q: "局部小補修時，所使用噴槍的噴塗壓力應該比整車噴塗時要：", opts: ["高", "無關", "低", "一樣"] },
-                { id: 25, ans: 3, q: "俗名氯仿之有機溶劑，具芳香味，對肝臟及神經組織具強烈毒性，其學名是：", opts: ["三氯乙烷", "二氯乙烷", "三氯甲烷", "二氯甲烷"] },
-                { id: 26, ans: 3, q: "利用熱風噴烤漆房時，必須測量房內的：", opts: ["光度", "濕度", "溫度", "風量"] },
-                { id: 27, ans: 3, q: "在工作職場中比專業技術還重要的是：", opts: ["愛心", "耐心", "工作的態度", "信心"] },
-                { id: 28, ans: 3, q: "下地處理不良所造成的缺陷，下列現象何者較為可能？", opts: ["粉狀脫落", "起霧", "起皺", "粒物"] },
-                { id: 29, ans: 4, q: "預防化學品過量暴露，最根本的方法是：", opts: ["採用工程控制", "配戴個人防護具", "實施環境測定", "採用危害性較低的化學品"] },
-                { id: 30, ans: 3, q: "危害物圖示之象徵符號為黑色液體自兩個玻璃容器倒在手上與金屬片上，表示是：", opts: ["禁水性", "有毒性", "腐蝕性", "易燃性"] },
-                { id: 31, ans: 1, q: "噴塗中產生斷漆、色斑、絲狀的原因是：", opts: ["壓縮空氣不足、塗料粘度高", "壓縮空氣不足、塗料粘度低", "壓縮空氣大、塗料粘度低", "壓縮空氣大、塗料粘度高"] },
-                { id: 32, ans: 3, q: "色彩的鮮豔度稱為：", opts: ["亮度", "色相", "彩度", "明度"] },
-                { id: 33, ans: 4, q: "聚氨基甲酸酯(PU)塗料如加入硝化纖維素噴漆用香蕉水會發生：", opts: ["白化", "橘子皮", "高光澤", "小氣泡與針孔"] },
-                { id: 34, ans: 4, q: "舊漆面在進行補修時：", opts: ["可直接噴塗新漆", "先剝離舊漆", "先研磨", "先測試及辨別舊塗膜材料的種類及特性後選擇適合的方式進行補修作業"] },
-                { id: 35, ans: 3, q: "噴槍移動過快易造成：", opts: ["起泡", "流漆", "塗膜過薄", "針孔"] },
-                { id: 36, ans: 3, q: "可燃性液體如汽油、溶劑、燃料油、酒精、油脂類與可燃性氣體，如液化石油氣、溶解乙炔等引起之火災，不可用何者作為滅火劑？", opts: ["二氧化碳", "鹵化烷", "水", "泡沫"] },
-                { id: 37, ans: 3, q: "塗裝工程時如未注意原漆(舊塗膜)之性質會造成：", opts: ["白化", "垂流現象", "層間剝離", "遮蓋力不好"] },
-                { id: 38, ans: 1, q: "防護面具每次使用過後應：", opts: ["放入塑膠袋內，置於乾爽的地方", "放在噴塗作業區，以利取用", "使用香蕉水擦拭洗淨", "放在通風處，保持乾爽"] },
-                { id: 39, ans: 2, q: "主要會影響塗料的噴出量是：", opts: ["氣帽", "噴嘴", "氣壓調整閥", "噴幅大小"] },
-                { id: 40, ans: 2, q: "現代企業在組織上有不同單位，這些單位彼此應：", opts: ["相互競爭", "相互合作", "互不信任", "彼此互相猜疑"] },
-                { id: 41, ans: 1, q: "下列敘述何者有誤？", opts: ["紅色的互補色是藍色", "黃色之互補色是藍紫色", "紅色之鄰近色是黃紅色和紅紫色", "綠色之鄰近色是黃綠色和藍綠色"] },
-                { id: 42, ans: 4, q: "塗料的吐出量是由下列何者的開度來控制？", opts: ["噴嘴與氣帽", "噴幅與吐出量", "噴幅與空氣壓力", "針閥與錐形"] },
-                { id: 43, ans: 1, q: "補修調色前必須將舊漆膜以何種物質擦拭後再行比對顏色？", opts: ["研磨膏", "水", "香蕉水", "松香水"] },
-                { id: 44, ans: 2, q: "從事噴漆作業時，應該使用下列何種呼吸防護具最佳？", opts: ["防塵口罩", "供氣式防毒面罩", "過濾式防毒面罩", "綿紗口罩"] },
-                { id: 45, ans: 4, q: "空氣壓縮機放置的位置，為了良好的散熱效果，最好離牆壁：", opts: ["20公分左右", "10公分左右", "100公分以上", "30公分以上"] },
-                { id: 46, ans: 2, q: "在顏色空間裡需要幾個空間來表示一個顏色？", opts: ["16", "3", "無", "6"] },
-                { id: 47, ans: 3, q: "塑膠補土如果過於乾燥時，可以添加多少以內的苯乙烯單量體(SM)充份攪拌後再依說明使用？", opts: ["20%", "40%", "10%", "30%"] },
-                { id: 48, ans: 1, q: "配方中的色母種類過多比較會影響：", opts: ["彩度", "光澤度", "明度", "色相"] },
-                { id: 49, ans: 1, q: "影響塗膜厚度主要因素：", opts: ["塗料黏度", "塗料附著力", "素材面之粗細度", "浸塗時間"] },
-                { id: 50, ans: 2, q: "噴塗完成透明漆後塗膜發現有髒粒，應於透明漆何種狀態之後才可以施行塗膜補救作業？", opts: ["濕潤", "完全乾燥硬化", "微濕", "微乾"] },
-                { id: 51, ans: 1, q: "調整消光劑之添加比率，可調整成：", opts: ["1/4平光、半平光與全平光塗膜", "半平光與全平光塗膜", "只有全平光塗膜", "只有半平光塗膜"] },
-                { id: 52, ans: 3, q: "珍珠銀粉漆添加銀粉色母會使彩度：", opts: ["不變", "變黑", "降低", "昇高"] },
-                { id: 53, ans: 4, q: "樹脂又稱為：", opts: ["平衡劑", "緩乾劑", "接著劑", "固漆劑"] },
-                { id: 54, ans: 3, q: "噴槍空氣罩與噴嘴之間隙過大，會使：", opts: ["噴塗流量過小", "沒有噴塗壓力", "霧化不均", "噴塗流量過大"] },
-                { id: 55, ans: 2, q: "攪拌塗料最佳工具為：", opts: ["銅棒", "不銹鋼棒", "木棒", "玻璃棒"] },
-                { id: 56, ans: 1, q: "二液型塗料是由下列何者組成？", opts: ["主劑和硬化劑", "柔軟劑與主劑", "硬化劑和溶劑", "主劑和溶劑"] },
-                { id: 57, ans: 2, q: "香蕉水或稀釋劑等有機溶劑所產生之危害因子為：", opts: ["粉塵", "蒸氣", "氣體", "燻煙"] },
-                { id: 58, ans: 2, q: "調色指南中，如果需要微調修正時，色母的選擇應當：", opts: ["優先使用最後一個色母", "優先使用配方中已有的色母", "優先使用配方以外的色母", "優先使用第一個色母"] },
-                { id: 59, ans: 4, q: "在使用個人防護設備時，宜作何種處理，以確保能隨時保持有效狀態？", opts: ["不定期", "隨時", "不需要", "定期保養與測試"] },
-                { id: 60, ans: 1, q: "噴塗伐銹底漆的標準厚度是：", opts: ["3~7μm", "13~17μm", "33~37μm", "23~27μm"] },
-                { id: 61, ans: 3, q: "可以防止舊塗膜的顏色溶至上層塗膜的漆是：", opts: ["面漆", "透明漆", "封底漆", "中塗漆"] },
-                { id: 62, ans: 2, q: "空氣霧化型噴槍空氣罩之側(角)孔堵塞時，會發生：", opts: ["噴塗斷斷續續", "噴霧形狀不良", "噴塗塗料滴漏", "噴塗塗料霧化不良現象"] },
-                { id: 63, ans: 1, q: "室內空氣品質的好壞，一般是以空氣中的何者作為指標？", opts: ["二氧化碳", "氧氣", "氮氣", "一氧化碳"] },
-                { id: 64, ans: 1, q: "用來連接顏料與顏料，並賦予塗膜光澤的物質是：", opts: ["樹脂", "稀釋劑", "柔軟劑", "緩乾劑"] },
-                { id: 65, ans: 1, q: "酒精是屬於何系列溶劑？", opts: ["醇系", "酮系", "焦油系", "酯系"] },
-                { id: 66, ans: 2, q: "除去金屬表面的黑皮是屬於何種性質的作業？", opts: ["增厚", "除銹", "脫脂", "填補抑制"] },
-                { id: 67, ans: 4, q: "二液型素色面漆噴塗一次的乾膜厚，大約為：", opts: ["50μm", "10μm", "5μm", "20μm"] },
-                { id: 68, ans: 1, q: "冬天溫度低塗膜乾燥慢，應該用快乾性：", opts: ["稀釋劑", "接合劑", "硬化劑", "柔軟劑"] },
-                { id: 69, ans: 2, q: "可視光波，依波長由短至長的排列順序是：", opts: ["紫－黃－橙－藍－綠－紅", "紫－藍－綠－黃－橙－紅", "紅－綠－黃－橙－紫－藍", "紅－橙－黃－綠－藍－紫"] },
-                { id: 70, ans: 3, q: "噴塗底漆及面漆時，應：", opts: ["保持通風，不需戴防護面具", "戴防塵口罩", "戴防護面具", "戴活性碳口罩"] },
-                { id: 71, ans: 4, q: "各種波長的顏色名稱叫：", opts: ["補色", "明度", "彩度", "色相"] },
-                { id: 72, ans: 1, q: "當車輛噴塗時，直接穿戴在身上以防止危害，並將受害程度降至最低的一種防護稱為：", opts: ["個人防護裝備", "大衣", "防水裝備", "救生衣"] },
-                { id: 73, ans: 1, q: "打開空氣壓縮機的排水閥排除油水，至少每間隔多少時間一次？", opts: ["一日", "一月", "一週", "一季"] },
-                { id: 74, ans: 3, q: "補修的噴槍速度應為：", opts: ["900~1200cm/min", "900~1200cm/sec", "90~120cm/sec", "9~12cm/sec"] },
-                { id: 75, ans: 1, q: "鍍鋅金屬板應：", opts: ["先噴塗伐銹底漆做基底後再施工", "先噴塗中塗底漆填充細孔，整平表面後再施工", "先用溶劑擦拭後再噴塗面漆塗料", "可直接噴塗面漆塗料"] },
-                { id: 76, ans: 2, q: "塗料經噴塗後在塗膜面上出現細小類似火山口狀是何種現象？", opts: ["開裂", "魚眼", "起泡", "起痱子"] },
-                { id: 77, ans: 4, q: "如果要判斷補土的硬化狀況，應該檢查：", opts: ["觸摸鐵皮的溫度", "補土厚的部位", "補土最高部位", "補土較薄部位"] },
-                { id: 78, ans: 4, q: "調色時應使用：", opts: ["對面色", "愈多種顏色愈好", "互補色", "相鄰色"] },
-                { id: 79, ans: 1, q: "刮塗補土要分數次薄薄地塗，不可一次厚塗，以避免補土層內產生何種缺陷？", opts: ["氣孔", "垂流", "橘子皮", "魚眼"] },
-                { id: 80, ans: 4, q: "補修塗裝須在塗膜何種狀態之後實施？", opts: ["不黏塵乾燥", "硬化乾燥", "指觸乾燥", "完全硬化乾燥"] }
-            ],
-            "105": [
-                { id: 1, ans: 2, q: "塗裝時發生垂流之原因之一為：", opts: ["塗料噴嘴口太小", "噴槍太接近被塗面", "噴槍移動太快", "塗料噴塗吐出量太少"] },
-                { id: 2, ans: 2, q: "對於HVLP環保噴槍，下列敘述何者有誤？", opts: ["較傳統式噴槍傳遞效率高", "噴塗耗氣量較傳統式噴槍小(公升/分鐘)", "噴塗距離較傳統式噴槍短", "較傳統式噴槍節省漆料"] },
-                { id: 3, ans: 3, q: "相同的二個灰色板，置於何種顏色板上會比較灰暗？", opts: ["黃色", "綠色", "白色", "黑色"] },
-                { id: 4, ans: 1, q: "可燃性液體如汽油、溶劑、燃料油、酒精、油脂類與可燃性氣體，如液化石油氣、溶解乙炔等引起之火災，不可用何者作為滅火劑？", opts: ["水", "鹵化烷", "二氧化碳", "泡沫"] },
-                { id: 5, ans: 1, q: "塑膠保桿以鐵絲刮其內側不易刮傷的是：", opts: ["PP", "PVC", "PE", "PU"] },
-                { id: 6, ans: 3, q: "第一種有機溶劑混存物，係指有機溶劑混存物中，含有第一種有機溶劑佔該混存物重量：", opts: ["百分之三以上", "百分之二以上", "百分之五以上", "百分之四以上"] },
-                { id: 7, ans: 3, q: "三原色中任意二色相加(調合)的結果稱為：", opts: ["第一次色", "第四次色", "第二次色", "第三次色"] },
-                { id: 8, ans: 1, q: "補土與硬化劑混合比例，正確應為：", opts: ["2~3%", "1~2%", "5~6%", "不一定"] },
-                { id: 9, ans: 2, q: "用粘度杯測量塗料粘度時，由開始將黏度杯提高離塗料表面算起至何時所經過之秒數？", opts: ["剩下最後一滴", "由連續線狀呈現不連續的瞬間", "剩下最後2、3滴", "待測量的量杯內的塗料滴完為止"] },
-                { id: 10, ans: 4, q: "長橢圓形噴幅之疊塗比例應該是噴幅寬度的：", opts: ["1/2", "1/5", "1/4", "1/3"] },
-                { id: 11, ans: 3, q: "預防化學品過量暴露，最根本的方法是採用何種化學品？", opts: ["危害性高", "價格昂貴", "危害性低", "價格便宜"] },
-                { id: 12, ans: 4, q: "勞工於任何時間暴露在有害污染物下，皆不得超過此濃度，係指：", opts: ["致死濃度", "短時間時量平均容許濃度", "時量平均容許濃度", "最高容許濃度"] },
-                { id: 13, ans: 2, q: "素色漆，白色系加入30%以上的白色色母，會促進白度感及偏向：", opts: ["降低明亮度", "提高明亮度", "帶點藍色調", "帶點綠色調"] },
-                { id: 14, ans: 3, q: "綠色的波長要比橙色的波長：", opts: ["無法比較", "長", "短", "一樣"] },
-                { id: 15, ans: 4, q: "勻化稀釋劑(俗稱接咀香蕉水)的揮發型態是屬於：", opts: ["不揮發型", "中乾型", "快乾型", "慢乾型"] },
-                { id: 16, ans: 2, q: "使用二液型塗料時，添加硬化劑比率不當，則可能造成：", opts: ["橘子皮現象", "乾燥異常", "氣泡現象", "銀粉不均勻現象"] },
-                { id: 17, ans: 2, q: "HVLP噴槍是指何種噴槍？", opts: ["低噴塗流量低空氣壓力", "高噴塗流量低空氣壓力", "高噴塗流量高空氣壓力", "低噴塗流量高空氣壓力"] },
-                { id: 18, ans: 3, q: "顏色標準是以何者作最後審查？", opts: ["紅外線燈", "光澤計", "人眼", "電子顯微鏡"] },
-                { id: 19, ans: 1, q: "以空氣霧化型噴槍噴塗，一般將面漆塗料稀釋(福特4號黏度杯)，調整黏度時間為：", opts: ["16~25秒", "46~55秒", "6~15秒", "36~45秒"] },
-                { id: 20, ans: 1, q: "下列何者為空氣乾燥型之塗料？", opts: ["氧化聚合乾燥型", "使樹脂與硬化劑混合", "二液聚合乾燥型", "硝化棉噴漆"] },
-                { id: 21, ans: 4, q: "色漆塗膜表層有些髒粒子，大多來自於何者所導致？", opts: ["透明漆乾燥太快", "溫度控制不當", "色漆乾燥太慢", "顏料沒有過濾"] },
-                { id: 22, ans: 2, q: "色彩的明暗度稱為：", opts: ["色相", "明度", "彩度", "亮度"] },
-                { id: 23, ans: 3, q: "噴槍的哪一部分可以把自噴嘴前端圓錐狀的塗料粒子壓向兩側成扁平狀？", opts: ["噴嘴", "空氣罩主空氣孔", "空氣罩側面空氣孔", "空氣罩輔助空氣孔"] },
-                { id: 24, ans: 2, q: "噴塗汽車的色漆塗料(DIN4)較適合黏度調整大約是幾秒？", opts: ["10~14", "15~18", "23~26", "19~22"] },
-                { id: 25, ans: 4, q: "我們感受到顏色所必須具備之條件，下列何者為非？", opts: ["光源", "眼睛", "物體", "投射鏡"] },
-                { id: 26, ans: 2, q: "噴塗鈑件時，若調整噴槍的塗料流量小，噴塗速度要如何以獲得較平滑的漆面？", opts: ["無關", "慢", "快", "不變"] },
-                { id: 27, ans: 4, q: "下列那種溶劑的毒性高，故不能作為塗料的稀釋溶劑？", opts: ["苯乙烯", "二甲苯", "甲苯", "苯"] },
-                { id: 28, ans: 4, q: "使用磷酸皮膜劑時，為保護手部應戴上：", opts: ["棉紗手套", "乳膠手套", "塑膠手套", "橡膠手套"] },
-                { id: 29, ans: 4, q: "使用高沸點溶劑來塗裝的話，表層乾燥的速度較：", opts: ["快", "不影響", "特快", "慢"] },
-                { id: 30, ans: 2, q: "羽狀邊作不好時，在噴完上塗後將會浮現明顯的：", opts: ["針孔、氣泡", "邊緣線", "砂紙痕", "泛黃"] },
-                { id: 31, ans: 4, q: "參閱顏色配方表，並以電子秤得到想要的塗料顏色，此一過程稱：", opts: ["計件調色", "計時調色", "計算調色", "計量調色"] },
-                { id: 32, ans: 4, q: "汽油是屬何種法規列管之物質？", opts: ["鉛中毒預防規則", "粉塵危害預防標準", "缺氧症預防規則", "有機溶劑中毒預防規則"] },
-                { id: 33, ans: 1, q: "如果您選擇微調，您應當：", opts: ["只使用配方裡的色母", "只使用鮮艷色母", "使用互補色", "使用所有色母"] },
-                { id: 34, ans: 4, q: "壓克力面漆噴塗完成後，最好約在何時撕去貼紙較為適當？", opts: ["隔夜", "20℃、1小時", "3天夜", "20℃、30分鐘"] },
-                { id: 35, ans: 4, q: "軟性橡皮補土刮板適用於：", opts: ["闊面", "平面", "斜面", "曲面"] },
-                { id: 36, ans: 4, q: "噴塗時噴槍與被塗物應保持幾度為原則？", opts: ["60度", "30度", "45度", "90度"] },
-                { id: 37, ans: 1, q: "塗裝的最大目的是：", opts: ["保護車體", "價值感", "美觀作用", "增加強度"] },
-                { id: 38, ans: 2, q: "在二液重合型當中，其烘烤溫度大都提昇在：", opts: ["60℃~80℃", "60℃~70℃", "50℃~80℃", "根本不用烘烤"] },
-                { id: 39, ans: 1, q: "乾燥過程中，以何時其塗膜硬度最高？", opts: ["完全乾燥", "沾塵乾燥", "硬化乾燥", "指觸乾燥"] },
-                { id: 40, ans: 4, q: "新車塗膜結構所謂4C3B意指在塗膜形成的過程中，經過：", opts: ["4次噴塗、3次研磨", "4次研磨、3次噴塗", "4次烘烤、3次噴塗", "4次噴塗、3次烘烤"] },
-                { id: 41, ans: 4, q: "下列那一項噴槍零件，係用來霧化塗料？", opts: ["塗料調整螺絲", "氣壓調整螺絲", "流量閥", "空氣罩"] },
-                { id: 42, ans: 2, q: "噴槍的空氣罩堵住，可用何者清理？", opts: ["小刀", "木籤", "鋼絲", "鐵片"] },
-                { id: 43, ans: 2, q: "職業安全衛生法的主管機關，在中央為：", opts: ["衛生福利部", "勞動部", "行政院原子能委員會", "行政院公共工程委員會"] },
-                { id: 44, ans: 2, q: "塗料中添加硬化劑之主要目的是，使塗膜形成成份的分子間發生何種作用？", opts: ["揮發", "架橋", "混合", "互溶"] },
-                { id: 45, ans: 3, q: "空氣霧化型噴槍的噴幅變化是以何者來調整？", opts: ["空氣流量鈕", "塗料鈕", "空氣罩的側孔", "空氣罩的中心孔"] },
-                { id: 46, ans: 4, q: "從事噪音作業時，應該使用下列何種防護具？", opts: ["防塵口罩", "防護眼鏡", "防毒面罩", "耳塞"] },
-                { id: 47, ans: 2, q: "研磨砂紙的號數愈大，其研磨顆粒愈：", opts: ["無號數之分", "小", "大", "不一定"] },
-                { id: 48, ans: 3, q: "塗料中添加緩乾劑，會增加塗膜的：", opts: ["亮度", "乾燥性", "平坦性", "厚度"] },
-                { id: 49, ans: 2, q: "防止塗膜白化在塗料中可填加：", opts: ["定色劑", "緩乾稀釋劑", "摧乾劑", "抗魚眼劑"] },
-                { id: 50, ans: 3, q: "工作的意義在於：", opts: ["賺錢", "消磨時間", "自我實現", "浪費生命"] },
-                { id: 51, ans: 2, q: "不飽合聚酯補土之收縮量較硝化纖維素油性補土為：", opts: ["大", "小", "不能比較", "一樣"] },
-                { id: 52, ans: 2, q: "依曼氏(MUNSELL)之色立體圖，在中心軸上的是：", opts: ["厚度", "明度", "彩度", "色相"] },
-                { id: 53, ans: 1, q: "由於有毒物質重覆暴露後，因少量物質未能完全排出體外，逐漸累積至某一程度而造成系統的傷害，稱為何種中毒？", opts: ["慢性", "水性", "乾性", "急性"] },
-                { id: 54, ans: 4, q: "連接噴槍的橡膠軟管的長度，與噴塗作業時的何者有直接關係？", opts: ["方向", "噴塗幅度", "速度", "空氣壓力"] },
-                { id: 55, ans: 3, q: "可視光波，依波長由短至長的排列順序是：", opts: ["紫－黃－橙－藍－綠－紅", "紅－綠－黃－橙－紫－藍", "紫－藍－綠－黃－橙－紅", "紅－橙－黃－綠－藍－紫"] },
-                { id: 56, ans: 3, q: "在樹脂中藉由化學及反應而固化的是：", opts: ["熱提煉樹脂", "熱可塑性樹脂", "熱硬化樹脂", "熱分解樹脂"] },
-                { id: 57, ans: 2, q: "事業單位發生勞工死亡之職業災害時，雇主應於幾小時內向檢查機關報告？", opts: ["12小時", "8小時", "48小時", "36小時"] },
-                { id: 58, ans: 3, q: "下列何者是有機溶劑進入人體之主要途徑？", opts: ["消化器官", "皮膚", "呼吸器官", "眼睛"] },
-                { id: 59, ans: 3, q: "修補作業如果研磨至裸鋼時，應做下列何處理？", opts: ["噴中塗漆", "直接補土", "噴防銹底漆", "直接噴塗面漆"] },
-                { id: 60, ans: 3, q: "研磨補土時，選用砂紙的順序，最佳為：", opts: ["#120→#240→#180→#320", "#320→#240→#180→#120", "#120→#180→#240→#320", "#240→#180→#120→#320"] },
-                { id: 61, ans: 2, q: "遮蔽反貼法可以避免：", opts: ["塗膜失亮", "塗膜段差", "節省料材", "打腊工作"] },
-                { id: 62, ans: 1, q: "靜電蓄積達一定量：", opts: ["會迸出火花", "可用於乾燥", "不會迸出火花", "有利於靜電塗裝"] },
-                { id: 63, ans: 2, q: "要獲得均勻的塗膜，適當的重疊寬度以何者作為參考依據？", opts: ["噴槍角度", "噴幅", "漆的吐出量", "噴槍距離"] },
-                { id: 64, ans: 1, q: "俗名氯仿之有機溶劑，具芳香味，對肝臟及神經組織具強烈毒性，其學名是：", opts: ["三氯甲烷", "二氯甲烷", "二氯乙烷", "三氯乙烷"] },
-                { id: 65, ans: 1, q: "影響塗膜厚度主要因素：", opts: ["塗料黏度", "浸塗時間", "素材面之粗細度", "塗料附著力"] },
-                { id: 66, ans: 3, q: "等著色量的綠色與等著色量的紅色，其所調出來的顏色，應該是：", opts: ["紅色", "紫色", "灰色", "藍色"] },
-                { id: 67, ans: 2, q: "調色時，應先選擇用：", opts: ["補色", "鄰近色", "灰色", "相對色"] },
-                { id: 68, ans: 1, q: "二液型塗料是由下列何者組成？", opts: ["主劑和硬化劑", "硬化劑和溶劑", "主劑和溶劑", "柔軟劑與主劑"] },
-                { id: 69, ans: 4, q: "具有溝通、協調、統合及組織能力的人，適合從事下列何種工作？", opts: ["研究", "技師", "教學", "管理"] },
-                { id: 70, ans: 3, q: "砂紙選擇，如現用#100砂紙，接著再選擇之砂紙應為：", opts: ["#600~#1200", "#240~#320", "#120~#180", "#400~#600"] },
-                { id: 71, ans: 4, q: "不飽和聚酯補土與硬化劑之混合比例約為：", opts: ["100：3~4", "100：1~2", "100：4~5", "100：2~3"] },
-                { id: 72, ans: 4, q: "用來連接顏料與顏料，並賦予塗膜光澤的物質是：", opts: ["緩乾劑", "稀釋劑", "柔軟劑", "樹脂"] },
-                { id: 73, ans: 2, q: "二氧化鈦是何種顏料？", opts: ["黑色", "白色", "黃色", "藍色"] },
-                { id: 74, ans: 1, q: "使用重力式噴槍噴塗二液型中塗塗料時，應選擇何種噴槍口徑最佳（mm）？", opts: ["1.6~2.0", "2.1~2.5", "1.3~1.5", "1.0~1.2"] },
-                { id: 75, ans: 1, q: "噴塗底漆及面漆時，應：", opts: ["戴防護面具", "戴防塵口罩", "戴活性碳口罩", "保持通風，不需戴防護面具"] },
-                { id: 76, ans: 3, q: "補土施工要領第一道是：", opts: ["用力刮塗且厚塗", "輕輕刮塗且厚塗", "用力刮塗且薄塗", "輕輕刮塗且薄塗"] },
-                { id: 77, ans: 1, q: "塗裝作業場所之照明及通風設備應具：", opts: ["防爆型", "防水型", "防熱型", "防震型"] },
-                { id: 78, ans: 1, q: "苯之毒性較甲苯：", opts: ["大", "兩者皆無害", "小", "一樣"] },
-                { id: 79, ans: 4, q: "噴塗作業環境之有機溶劑濃度是否超過容許濃度，正確應由何者偵測出來？", opts: ["觸覺", "嗅覺", "視覺", "儀器"] },
-                { id: 80, ans: 2, q: "履歷表的撰寫應注意：", opts: ["捨短取長", "簡明扼要", "意在言外", "長篇大論"] }
-            ],
-            "106": [
-                { id: 1, ans: 4, q: "下列何組較可能調配出紫色？", opts: ["藍、白、黑", "紅、黃、綠", "紅、黃、黑", "紅、藍、白"] },
-                { id: 2, ans: 4, q: "素色塗料乾燥後的顏色比濕的顏色：", opts: ["淺", "白", "沒變化", "深"] },
-                { id: 3, ans: 4, q: "調配混合漆料時，哪一種顏色塗料填加愈多時，明度越高？", opts: ["紅色", "黑色", "黃色", "白色"] },
-                { id: 4, ans: 3, q: "塗料儲存應於何種處所？", opts: ["不通風但需受日光直接照射", "不通風但避免日光直接照射", "通風良好且避免日光直接照射", "通風良好但需受日光直接照射"] },
-                { id: 5, ans: 1, q: "從事噴漆作業時，應該使用下列何種呼吸防護具最佳？", opts: ["供氣式防毒面罩", "防塵口罩", "綿紗口罩", "過濾式防毒面罩"] },
-                { id: 6, ans: 1, q: "作業環境溫度升高時，塗料的黏度狀況為：", opts: ["黏度變低", "黏度變高", "黏度不變", "與氣溫無關"] },
-                { id: 7, ans: 2, q: "用黏度杯測量塗料黏度時，由開始將黏度杯提高離塗料表面算起至何時所經過之秒數？", opts: ["剩下最後一滴", "由連續線狀呈現不連續的瞬間", "剩下最後2、3滴", "待測量的量杯內的塗料滴完為止"] },
-                { id: 8, ans: 4, q: "下列何種塗料之烘烤溫度最高且所需時間最長？", opts: ["氨基樹脂硬化型環氧樹脂塗料", "三聚氰胺樹脂塗料", "乙烯縮醛樹脂塗料", "矽利康樹脂塗料"] },
-                { id: 9, ans: 4, q: "下列何者非屬侷限空間作業定義？", opts: ["非供勞工在其內部從事經常性作業之空間", "勞工進出方法受限制之空間", "無法以自然通風來維持充分、清淨空氣之空間", "動火作業場所"] },
-                { id: 10, ans: 1, q: "用來連接顏料與顏料，並賦予塗膜光澤的物質是：", opts: ["樹脂", "緩乾劑", "稀釋劑", "柔軟劑"] },
-                { id: 11, ans: 2, q: "利用熱風噴烤漆房時，必須測量房內的：", opts: ["光度", "溫度", "風量", "濕度"] },
-                { id: 12, ans: 3, q: "下列何者被認為屬於智慧財產權的一種，但是在我國尚未制定專法保護？", opts: ["專利權", "商標權", "鄰接權", "著作權"] },
-                { id: 13, ans: 1, q: "下列所敘述之單位何者錯誤？", opts: ["空氣壓縮機馬力用cm", "噴塗空氣壓力用kg/cm²", "塗料噴出量用cc/min", "噴塗距離用cm表示"] },
-                { id: 14, ans: 4, q: "TiO2是：", opts: ["鋅銀白", "白煙", "鋅白", "鈦白"] },
-                { id: 15, ans: 1, q: "異物堵塞於噴槍空氣罩的側面孔阻塞時會發生：", opts: ["噴幅不良", "噴不出來", "垂流", "塗料霧化不良"] },
-                { id: 16, ans: 4, q: "噴塗鈑件時，若調整噴槍的塗料流量小，噴塗速度要如何以獲得較平滑的漆面？", opts: ["不變", "無關", "快", "慢"] },
-                { id: 17, ans: 4, q: "噴塗時噴槍與被塗物應保持幾度為原則？", opts: ["30度", "45度", "60度", "90度"] },
-                { id: 18, ans: 3, q: "整車外表塗裝依順序應先噴塗何處以減少漆塵污染？", opts: ["右前葉", "引擎蓋", "車頂", "左前葉"] },
-                { id: 19, ans: 1, q: "最會吸收光源熱能的顏色是：", opts: ["黑色", "白色", "紅色", "灰色"] },
-                { id: 20, ans: 4, q: "員工想要融入一個組織當中，下列哪一個做法較為可行？", opts: ["經常拜訪公司的客戶", "經常送禮物給同事", "經常加班工作到深夜", "經常參與公司的聚會與團體活動"] },
-                { id: 21, ans: 1, q: "製作羽狀邊，邊緣寬度大約是：", opts: ["30mm", "300mm", "3000mm", "3mm"] },
-                { id: 22, ans: 2, q: "二液型塗料混合攪拌放置一段時間後，發覺表面結皮時：", opts: ["立刻充分攪拌後才可塗裝", "須更換塗料重新調配", "除掉結皮即可塗裝", "除掉結皮充分攪拌後才可塗裝"] },
-                { id: 23, ans: 4, q: "緩乾稀釋劑有減緩塗膜表面何種缺陷的效果？", opts: ["白化", "軟化", "粗糙", "橘子皮"] },
-                { id: 24, ans: 4, q: "珍珠漆是以人造方式將天然雲母表面被覆著：", opts: ["氧化鋁", "氧化鐵", "二氧化碳", "二氧化鈦"] },
-                { id: 25, ans: 4, q: "預防化學品過量暴露，最根本的方法是：", opts: ["配戴個人防護具", "實施環境測定", "採用工程控制", "採用危害性較低的化學品"] },
-                { id: 26, ans: 3, q: "補土與硬化劑之混合比例，若高於3%時，易造成塗膜：", opts: ["沒有影響", "龜裂", "滲色", "密著性較佳"] },
-                { id: 27, ans: 2, q: "噴槍操作時，如因速度不均會使塗膜：", opts: ["失艷", "厚度不均勻", "橘皮", "流漆"] },
-                { id: 28, ans: 4, q: "環氧樹脂塗料的種類有：", opts: ["只有一液型", "只有二液型", "一液型、二液型及多液型", "一液型及二液型"] },
-                { id: 29, ans: 1, q: "調漆室內之牆壁，為了避免產生比對顏色之干擾，所以應選用：", opts: ["淺灰色", "淺黃色", "淺白色", "淺黑色"] },
-                { id: 30, ans: 2, q: "噴槍的口徑愈大時：", opts: ["塗料噴出量較少", "塗料噴出量較多", "空氣噴出量較少", "空氣噴出量較多"] },
-                { id: 31, ans: 3, q: "HVLP 噴槍尖端應與被塗面保持正確距離：", opts: ["20~25公分", "任意調整", "10~15公分", "30~45公分"] },
-                { id: 32, ans: 4, q: "珍珠銀粉漆添加銀粉色母會使彩度：", opts: ["變黑", "昇高", "不變", "降低"] },
-                { id: 33, ans: 4, q: "下列何者屬暖色系列？", opts: ["銀色", "藍色", "黑色", "粉紅色"] },
-                { id: 34, ans: 2, q: "打臘時，使用拋刮臘前可灑少量何種物質於打臘的表面，避免局部過熱並且可促進表面潤滑？", opts: ["稀釋劑", "清水", "酒精", "溶劑"] },
-                { id: 35, ans: 2, q: "下列各種番號砂紙中，何者之研削材料粒度最大？", opts: ["#200", "#100", "#800", "#400"] },
-                { id: 36, ans: 4, q: "噴塗中塗漆前，乾磨以何種砂紙最適當？", opts: ["#80", "#400", "#120", "#240"] },
-                { id: 37, ans: 2, q: "從事有機溶劑作業時，應配戴安全眼鏡與：", opts: ["塑膠手套", "耐溶劑手套", "棉紗手套", "不需戴手套操作"] },
-                { id: 38, ans: 3, q: "使用封底漆最主要功能為：", opts: ["整平", "防止補土凹痕", "隔離", "填孔"] },
-                { id: 39, ans: 3, q: "二液型烤漆如果塗裝完成後要加以強制乾燥烘烤時，適當的烘烤溫度為：", opts: ["40-59℃", "100℃以上", "60-80℃", "81-100℃"] },
-                { id: 40, ans: 2, q: "下列何者非屬法定勞動檢查結果之處理？", opts: ["公告違法事業單位", "警告", "停工", "移送司法機關偵辦"] },
-                { id: 41, ans: 4, q: "噴烤漆房通風系統應依個別場所特殊狀況由專家設計，在設置時必須考慮到法規要求的控制風速與：", opts: ["空間大小", "美觀", "光線", "換氣量"] },
-                { id: 42, ans: 3, q: "下列何者為非？", opts: ["靜電塗裝是使塗料帶負電、車身帶正電", "噴槍的作業是基於霧化的原理", "溫度高時黏度高、溫度低時黏度低", "在補修必須使用量色技巧"] },
-                { id: 43, ans: 2, q: "添加塗料倒入塗料杯中最好不要超過塗料杯容積的：", opts: ["50%", "80%", "30%", "100%"] },
-                { id: 44, ans: 1, q: "如需使用砂紙研磨整平後再進行研磨膏塗膜表面(拋光)處理時，最終應選用何者較為適當，以提高(拋光)處理效率？", opts: ["#1500", "#800", "#1000", "#600"] },
-                { id: 45, ans: 3, q: "補修的噴槍速度應為：", opts: ["900~1200cm/min", "900~1200cm/sec", "90~120cm/sec", "9~12cm/sec"] },
-                { id: 46, ans: 3, q: "「物質安全資料表」內容之正確性，至少每多久更新一次？", opts: ["一年", "四年", "三年", "二年"] },
-                { id: 47, ans: 3, q: "在顏色空間裡需要幾個空間來表示一個顏色？", opts: ["16", "6", "3", "無"] },
-                { id: 48, ans: 2, q: "事業單位僱用勞工多少人以上者，應依勞動基準法規定訂立工作規則？", opts: ["50人", "30人", "200人", "100人"] },
-                { id: 49, ans: 1, q: "勞工於短時間內連續暴露在有害污染物裡，所能容許的最高濃度，係指：", opts: ["短時間時量平均容許濃度", "最高容許濃度", "動物50%致死濃度", "時量平均容許濃度"] },
-                { id: 50, ans: 2, q: "對於顏色能夠分辨深淺度之屬性稱為：", opts: ["亮度", "明度", "色相", "彩度"] },
-                { id: 51, ans: 2, q: "雙軌研磨機的偏心軸距使用順序是（mm）：", opts: ["5→3→7", "7→5→3", "3→5→7", "7→3→5"] },
-                { id: 52, ans: 1, q: "作業過程中為預防粉塵、溶劑等異物傷及眼睛，必須配帶：", opts: ["安全眼鏡", "防塵口罩", "手套", "安全帽"] },
-                { id: 53, ans: 3, q: "我們能感受到物體顏色的條件，下列何者為非？", opts: ["接受反射光線的接受器", "光源", "光波", "反射光線的物體"] },
-                { id: 54, ans: 1, q: "公務機關或非公務機關所蒐集的個人資料正確性有所爭議，當事人提出停止處理或利用之請求時，機關不得逾幾日之期限對當事人提出准駁？", opts: ["30日", "7日", "15日", "14日"] },
-                { id: 55, ans: 2, q: "噴槍的哪一部分可以把自噴嘴前端圓錐狀的塗料粒子壓向兩側成扁平狀？", opts: ["噴嘴", "空氣罩側面空氣孔", "空氣罩輔助空氣孔", "空氣罩主空氣孔"] },
-                { id: 56, ans: 3, q: "不飽和聚酯補土(俗稱塑膠土)刮塗的標準厚度應在多少以下？", opts: ["3吋", "30厘米", "3厘米", "30吋"] },
-                { id: 57, ans: 1, q: "可見光波中，波長較長為：", opts: ["紅色", "綠色", "黃色", "藍色"] },
-                { id: 58, ans: 4, q: "塗料乾燥到能夠安裝零件的程度稱之為：", opts: ["指觸乾燥", "完全乾燥", "初期乾燥", "中期乾燥"] },
-                { id: 59, ans: 4, q: "使用於油性漆料的毛刷需長期保存時，用塗料稀釋劑洗淨後，應保持：", opts: ["完全濕潤", "乾燥", "浸泡水中", "微濕狀態"] },
-                { id: 60, ans: 2, q: "酒精是屬於何系列溶劑？", opts: ["酮系", "醇系", "焦油系", "酯系"] },
-                { id: 61, ans: 4, q: "使用機器研磨工具代替傳統手工研磨，其作業速度：", opts: ["平均大約一樣", "大約快一倍", "大約快半倍", "大約快三倍"] },
-                { id: 62, ans: 2, q: "在以塗料為材料之非金屬被覆防蝕中，是以何種特性的防蝕塗料用量最多且應用範圍最廣？", opts: ["耐衝擊性", "防銹性", "耐藥品性", "防水性"] },
-                { id: 63, ans: 4, q: "最不會吸收光源熱能的顏色是：", opts: ["紅色", "黑色", "灰色", "白色"] },
-                { id: 64, ans: 1, q: "中塗漆施工的說法下列何者為錯誤？", opts: ["若有些許補土裸露出來，因為不影響品質，故不必理會它", "研磨中塗漆噴塗區域需將其邊緣磨薄", "使用400號砂紙研磨中塗漆後，可再使用600號砂紙修飾磨除砂紙痕", "因中塗漆具有整平的功能，研磨時須小心"] },
-                { id: 65, ans: 4, q: "鋁粉屬於下列何種物質？", opts: ["引火性物質", "爆炸性物質", "氧化性物質", "著火性物質"] },
-                { id: 66, ans: 2, q: "利用外界的自然風力及室內外的溫度差異原理達到換氣目的，稱為：", opts: ["局部排氣裝置", "自然換氣", "密閉設備", "整體換氣裝置"] },
-                { id: 67, ans: 1, q: "硫酸屬於下列何種物質？", opts: ["腐蝕性物質", "刺激性物質", "毒性物質", "氧化性物質"] },
-                { id: 68, ans: 1, q: "汽油是屬何種法規列管之物質？", opts: ["有機溶劑中毒預防規則", "鉛中毒預防規則", "粉塵危害預防標準", "缺氧症預防規則"] },
-                { id: 69, ans: 1, q: "下列哪一種工作態度並不足取？", opts: ["在公司內使用E-mail時，任意發送與工作無關的訊息給同仁", "工作時注重細節，以追求最高的工作品質為目標", "在公司規定上班時間之前，就完成上工的一切準備動作", "在工作時喜歡團隊合作，與其他同仁充分人際互動"] },
-                { id: 70, ans: 1, q: "素色漆乾燥後顏色更深，是色母何種因素影響？", opts: ["比重", "黏度", "濃度", "亮度"] },
-                { id: 71, ans: 4, q: "在進行調色時，為達能較直接降低顏色彩度效果，可選用何種色母較適當？", opts: ["鄰近色", "特殊色", "對比色", "對補色"] },
-                { id: 72, ans: 1, q: "下列何者非屬勞工從事電氣工作，應符合之規定？", opts: ["穿戴棉質手套絕緣", "停電作業應檢電掛接地", "使其使用電工安全帽", "穿戴絕緣防護具"] },
-                { id: 73, ans: 1, q: "塗膜重疊處發生滴流現象，表示噴槍移動：", opts: ["速度太慢", "是自然現象", "速度太快", "與速度無關"] },
-                { id: 74, ans: 2, q: "在溫、濕度高的作業環境下，實施塗裝時，易造成何種現象？", opts: ["針孔", "白化", "橘子皮", "魚眼"] },
-                { id: 75, ans: 3, q: "NC硝化棉的乾燥型態應屬：", opts: ["自我反應型", "空氣乾燥型", "溶劑揮發乾燥型", "二液重合型"] },
-                { id: 76, ans: 2, q: "處理化學物後須徹底洗手是工作時個人應有的何種習慣？", opts: ["潔癖", "安全衛生", "避免被責備", "形式化"] },
-                { id: 77, ans: 2, q: "一般可燃性固體如木材、紙張、紡織品、橡膠等所引起之火災，稱為何類火災？", opts: ["丁類", "甲類", "丙類", "乙類"] },
-                { id: 78, ans: 3, q: "氧化鐵與氧化鈦顏料屬於：", opts: ["有機顏料", "含鉛顏料", "無機顏料", "含汞顏料"] },
-                { id: 79, ans: 4, q: "聚胺酯塗料如果加入硝化纖維素塗料溶劑會發生：", opts: ["橘子皮", "高光澤", "白化", "小氣泡與針孔"] },
-                { id: 80, ans: 2, q: "室內空氣品質的好壞，一般是以空氣中的何者作為指標？", opts: ["一氧化碳", "二氧化碳", "氦氣", "氧氣"] }
-            ]
-        };
+      if (visibleCount === 0) {
+        html = `
+          <div class="bg-white rounded-2xl p-10 text-center border border-slate-200 text-slate-500">
+            <p class="text-base font-bold">沒有符合條件的題目</p>
+            <p class="text-xs mt-1">請嘗試清除搜尋關鍵字或關閉錯題篩選</p>
+          </div>
+        `;
+      }
 
-        const circleNums = ["①", "②", "③", "④"];
-        let currentYear = "104";
-        let currentMode = "exam"; // 'exam' | 'instant'
+      container.innerHTML = html;
+    }
 
-        // 各年度獨立狀態保存
-        const yearStates = {
-            "104": { userAnswers: {}, isSubmitted: false, filter: "all" },
-            "105": { userAnswers: {}, isSubmitted: false, filter: "all" },
-            "106": { userAnswers: {}, isSubmitted: false, filter: "all" }
-        };
-
-        function getActiveQuestions() {
-            return allQuizData[currentYear];
-        }
-
-        function getActiveState() {
-            return yearStates[currentYear];
-        }
-
-        // 自訂確認對話框
-        function showConfirmModal(title, message, onConfirm) {
-            const modal = document.getElementById('customModal');
-            document.getElementById('modalTitle').textContent = title;
-            document.getElementById('modalMessage').textContent = message;
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-
-            const confirmBtn = document.getElementById('modalConfirmBtn');
-            const cancelBtn = document.getElementById('modalCancelBtn');
-
-            const cleanup = () => {
-                modal.classList.add('hidden');
-                modal.classList.remove('flex');
-                confirmBtn.onclick = null;
-                cancelBtn.onclick = null;
-            };
-
-            confirmBtn.onclick = () => {
-                cleanup();
-                onConfirm();
-            };
-            cancelBtn.onclick = () => {
-                cleanup();
-            };
-        }
-
-        function init() {
-            updateYearTabsUI();
-            syncHeaderAndBannerUI();
-            renderQuestionGrid();
-            renderQuestions();
-        }
-
-        function switchYear(year) {
-            if (currentYear === year) return;
-            currentYear = year;
-            document.getElementById('yearTitle').textContent = `${year}年度 車輛塗裝丙級 學科練習`;
-            updateYearTabsUI();
-            syncHeaderAndBannerUI();
-            renderQuestionGrid();
-            renderQuestions();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function updateYearTabsUI() {
-            ["104", "105", "106"].forEach(yr => {
-                const tabBtn = document.getElementById(`tab-${yr}`);
-                const badge = document.getElementById(`tab-badge-${yr}`);
-                const st = yearStates[yr];
-                const answeredCount = Object.keys(st.userAnswers).length;
-
-                if (st.isSubmitted) {
-                    let correct = 0;
-                    allQuizData[yr].forEach(q => {
-                        if (st.userAnswers[q.id] === q.ans) correct++;
-                    });
-                    const score = (correct * 1.25).toFixed(2).replace(/\.00$/, '');
-                    badge.textContent = `${score}分`;
-                    badge.className = score >= 60 
-                        ? "text-xs px-1.5 py-0.5 rounded-full bg-emerald-500 text-white font-bold"
-                        : "text-xs px-1.5 py-0.5 rounded-full bg-rose-500 text-white font-bold";
-                } else {
-                    badge.textContent = `${answeredCount}/80`;
-                    badge.className = yr === currentYear
-                        ? "text-xs px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-800 font-semibold"
-                        : "text-xs px-1.5 py-0.5 rounded-full bg-slate-700 text-slate-300 font-normal";
-                }
-
-                if (yr === currentYear) {
-                    tabBtn.className = "px-4 py-2 rounded-t-lg text-sm font-bold transition flex items-center gap-2 bg-white text-slate-900 shadow-xs";
-                } else {
-                    tabBtn.className = "px-4 py-2 rounded-t-lg text-sm font-bold transition flex items-center gap-2 bg-slate-800 text-slate-300 hover:bg-slate-700";
-                }
-            });
-        }
-
-        function setMode(mode) {
-            currentMode = mode;
-            const examBtn = document.getElementById('modeExamBtn');
-            const instantBtn = document.getElementById('modeInstantBtn');
-            if (mode === 'exam') {
-                examBtn.className = "px-3 py-1.5 rounded-md font-medium bg-blue-600 text-white shadow-sm transition";
-                instantBtn.className = "px-3 py-1.5 rounded-md font-medium text-slate-600 hover:text-slate-900 transition";
-            } else {
-                instantBtn.className = "px-3 py-1.5 rounded-md font-medium bg-blue-600 text-white shadow-sm transition";
-                examBtn.className = "px-3 py-1.5 rounded-md font-medium text-slate-600 hover:text-slate-900 transition";
-            }
-            renderQuestions();
-            renderQuestionGrid();
-        }
-
-        function selectOption(qId, optNum) {
-            const st = getActiveState();
-            if (st.isSubmitted) return;
-            st.userAnswers[qId] = optNum;
-            updateProgress();
-            updateYearTabsUI();
-            renderSingleQuestion(qId);
-            renderQuestionGrid();
-        }
-
-        function updateProgress() {
-            const st = getActiveState();
-            const answeredCount = Object.keys(st.userAnswers).length;
-            document.getElementById('progressBadge').textContent = `已作答: ${answeredCount} / 80`;
-        }
-
-        function syncHeaderAndBannerUI() {
-            const st = getActiveState();
-            const questionsData = getActiveQuestions();
-            updateProgress();
-
-            const banner = document.getElementById('resultBanner');
-            if (st.isSubmitted) {
-                let correct = 0;
-                questionsData.forEach(item => {
-                    if (st.userAnswers[item.id] === item.ans) correct++;
-                });
-                const rawScore = correct * 1.25;
-                const score = rawScore.toFixed(2).replace(/\.00$/, '');
-                const wrong = 80 - correct;
-
-                document.getElementById('scoreText').textContent = score;
-                document.getElementById('correctCount').textContent = correct;
-                document.getElementById('wrongCount').textContent = wrong;
-
-                const passBadge = document.getElementById('passStatusBadge');
-                if (rawScore >= 60) {
-                    passBadge.textContent = "及格";
-                    passBadge.className = "ml-2 text-xs px-2 py-0.5 rounded font-bold bg-emerald-500 text-white";
-                } else {
-                    passBadge.textContent = "不及格";
-                    passBadge.className = "ml-2 text-xs px-2 py-0.5 rounded font-bold bg-rose-500 text-white";
-                }
-
-                banner.classList.remove('hidden');
-            } else {
-                banner.classList.add('hidden');
-            }
-
-            // 同步篩選按鈕外觀
-            const allBtn = document.getElementById('filterAllBtn');
-            const wrongBtn = document.getElementById('filterWrongBtn');
-            if (st.filter === 'all') {
-                allBtn.className = "px-3 py-1 rounded bg-slate-700 text-white font-medium";
-                wrongBtn.className = "px-3 py-1 rounded bg-slate-800 text-slate-300 hover:bg-slate-700";
-            } else {
-                wrongBtn.className = "px-3 py-1 rounded bg-rose-600 text-white font-medium";
-                allBtn.className = "px-3 py-1 rounded bg-slate-800 text-slate-300 hover:bg-slate-700";
-            }
-        }
-
-        function renderQuestionGrid() {
-            const grid = document.getElementById('questionGrid');
-            grid.innerHTML = '';
-            const questionsData = getActiveQuestions();
-            const st = getActiveState();
-
-            questionsData.forEach(item => {
-                const uAns = st.userAnswers[item.id];
-                const showAns = st.isSubmitted || (currentMode === 'instant' && uAns !== undefined);
-                
-                let bgClass = "bg-slate-100 text-slate-600 hover:bg-slate-200 border-slate-200";
-                if (showAns) {
-                    if (uAns === item.ans) {
-                        bgClass = "bg-emerald-500 text-white border-emerald-600 font-bold";
-                    } else {
-                        bgClass = "bg-rose-500 text-white border-rose-600 font-bold";
-                    }
-                } else if (uAns !== undefined) {
-                    bgClass = "bg-blue-600 text-white border-blue-700 font-bold";
-                }
-
-                const btn = document.createElement('button');
-                btn.className = `text-xs py-1.5 rounded border transition ${bgClass}`;
-                btn.textContent = item.id;
-                btn.onclick = () => {
-                    const el = document.getElementById(`q-card-${item.id}`);
-                    if (el) {
-                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }
-                };
-                grid.appendChild(btn);
-            });
-        }
-
-        function renderQuestions() {
-            const container = document.getElementById('quizContainer');
-            container.innerHTML = '';
-            const questionsData = getActiveQuestions();
-            const st = getActiveState();
-
-            let visibleCount = 0;
-            questionsData.forEach(item => {
-                const uAns = st.userAnswers[item.id];
-                if (st.isSubmitted && st.filter === 'wrong' && uAns === item.ans) {
-                    return; // 只看錯題時略過答對的題目
-                }
-                visibleCount++;
-                const card = document.createElement('div');
-                card.id = `q-card-${item.id}`;
-                card.className = "bg-white rounded-xl shadow-sm border border-slate-200 p-5 transition";
-                card.innerHTML = buildQuestionCardHTML(item);
-                container.appendChild(card);
-            });
-
-            if (visibleCount === 0) {
-                container.innerHTML = `
-                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-8 text-center">
-                        <p class="text-lg font-bold text-emerald-600 mb-1">🎉 太棒了！本卷全部答對，沒有任何錯題！</p>
-                        <p class="text-sm text-slate-500">可點擊上方「全部題目 (80)」檢視所有題目。</p>
-                    </div>
-                `;
-            }
-        }
-
-        function renderSingleQuestion(qId) {
-            const questionsData = getActiveQuestions();
-            const item = questionsData.find(q => q.id === qId);
-            const card = document.getElementById(`q-card-${qId}`);
-            if (item && card) {
-                card.innerHTML = buildQuestionCardHTML(item);
-            }
-        }
-
-        function buildQuestionCardHTML(item) {
-            const st = getActiveState();
-            const uAns = st.userAnswers[item.id];
-            const showResult = st.isSubmitted || (currentMode === 'instant' && uAns !== undefined);
-            const isCorrect = uAns === item.ans;
-
-            let statusBadge = '';
-            if (showResult) {
-                if (uAns === undefined) {
-                    statusBadge = `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-300">未作答 (正解: ${circleNums[item.ans - 1]})</span>`;
-                } else if (isCorrect) {
-                    statusBadge = `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">✓ 答對了</span>`;
-                } else {
-                    statusBadge = `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-300">✗ 答錯 (正解: ${circleNums[item.ans - 1]})</span>`;
-                }
-            } else if (uAns !== undefined) {
-                statusBadge = `<span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">已選 ${circleNums[uAns - 1]}</span>`;
-            }
-
-            const optionsHTML = item.opts.map((optText, idx) => {
-                const optNum = idx + 1;
-                const isSelected = uAns === optNum;
-                const isRightAns = item.ans === optNum;
-
-                let btnStyle = "border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700";
-                let badgeIcon = "";
-
-                if (showResult) {
-                    if (isRightAns) {
-                        btnStyle = "border-emerald-500 bg-emerald-50 text-emerald-900 font-semibold ring-1 ring-emerald-500";
-                        badgeIcon = `<span class="ml-auto text-xs font-bold text-emerald-700 bg-emerald-200 px-2 py-0.5 rounded shrink-0">正確答案</span>`;
-                    } else if (isSelected && !isRightAns) {
-                        btnStyle = "border-rose-400 bg-rose-50 text-rose-900 line-through opacity-90";
-                        badgeIcon = `<span class="ml-auto text-xs font-bold text-rose-700 bg-rose-200 px-2 py-0.5 rounded shrink-0">你的選擇</span>`;
-                    } else {
-                        btnStyle = "border-slate-200 bg-white text-slate-400 opacity-70";
-                    }
-                } else {
-                    if (isSelected) {
-                        btnStyle = "border-blue-600 bg-blue-50 text-blue-900 font-semibold ring-1 ring-blue-600";
-                    }
-                }
-
-                return `
-                    <button 
-                        type="button"
-                        onclick="selectOption(${item.id}, ${optNum})"
-                        ${st.isSubmitted ? 'disabled' : ''}
-                        class="option-btn w-full text-left px-4 py-3 rounded-lg border flex items-center gap-3 ${btnStyle}"
-                    >
-                        <span class="text-base font-bold shrink-0">${circleNums[idx]}</span>
-                        <span class="text-sm sm:text-base">${optText}</span>
-                        ${badgeIcon}
-                    </button>
-                `;
-            }).join('');
-
-            return `
-                <div class="flex items-start justify-between gap-3 mb-3">
-                    <div class="flex items-baseline gap-2">
-                        <span class="inline-flex items-center justify-center bg-slate-800 text-white text-xs font-bold px-2.5 py-1 rounded-md shrink-0">
-                            第 ${item.id} 題
-                        </span>
-                        <h2 class="text-base sm:text-lg font-semibold text-slate-900 leading-snug">${item.q}</h2>
-                    </div>
-                    <div class="shrink-0">${statusBadge}</div>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-3">
-                    ${optionsHTML}
-                </div>
-            `;
-        }
-
-        function executeSubmit() {
-            const st = getActiveState();
-            st.isSubmitted = true;
-            updateYearTabsUI();
-            syncHeaderAndBannerUI();
-            renderQuestionGrid();
-            renderQuestions();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function submitQuiz() {
-            const st = getActiveState();
-            if (st.isSubmitted) return;
-            const answeredCount = Object.keys(st.userAnswers).length;
-            if (answeredCount < 80) {
-                showConfirmModal(
-                    "尚未全部作答完畢",
-                    `你在 ${currentYear} 年度還有 ${80 - answeredCount} 題尚未作答，確定要現在交卷對答案嗎？`,
-                    executeSubmit
-                );
-            } else {
-                executeSubmit();
-            }
-        }
-
-        function setFilter(filterType) {
-            const st = getActiveState();
-            st.filter = filterType;
-            syncHeaderAndBannerUI();
-            renderQuestions();
-        }
-
-        function executeReset() {
-            const st = getActiveState();
-            st.userAnswers = {};
-            st.isSubmitted = false;
-            st.filter = 'all';
-            updateYearTabsUI();
-            syncHeaderAndBannerUI();
-            renderQuestionGrid();
-            renderQuestions();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function resetQuiz() {
-            const st = getActiveState();
-            if (Object.keys(st.userAnswers).length > 0 || st.isSubmitted) {
-                showConfirmModal(
-                    "重新測驗本年度",
-                    `確定要清空 ${currentYear} 年度的所有作答紀錄並重新練習嗎？（其他年度的紀錄不會受影響）`,
-                    executeReset
-                );
-            } else {
-                executeReset();
-            }
-        }
-
-        init();
-    </script>
+    // 啟動初始化
+    initJumpSelect();
+    switchYear('104');
+    setMode('study');
+  </script>
 </body>
 </html>
